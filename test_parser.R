@@ -57,6 +57,13 @@
 #         使用它们时，主函数需要支持一个结果文件/目录路径设定，使用 hiplot_file/hiplot_outdir
 # en: Result descript in English.
 # zh: 结果的中文描述
+# @data
+# # 此处可以编写生成示例数据的代码
+# # 示例数据文件需要跟数据表格参数对应起来
+# # 或者忽略该标签，手动提交示例数据
+# library(readr)
+# data("mtcars")
+# write_tsv(mtcars, "data.txt")
 # @hiplot end
 
 library(ggplot2)
