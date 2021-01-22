@@ -9,15 +9,16 @@
 # @apptype vue one of vue and shiny. Shiny 的 main, param, return 等标签都会忽略
 # @target basic (where the plugin should be deployed to, only the first word included)
 # @status new one of new or a link to the hiplot plugin, e.g., https://hiplot.com.cn/basic/heatmap 用来加速审查
-# @author a, b, c
-# @maintainer a <a.email>, b, c
-# @url xxx.com
+# @author a, b, c (one line)
+# @maintainer a <a@163.com> (one name, one line)
+# @url xxx.com (a link to your project (like github) or NULL)
 # @citation This is a
 # Markdown paragraph to describe citation info.
 # @version 0.1.0 (a semantic version)
-# @description A detail description for this plugin,
+# @description
+# en: A detail description for this plugin,
 # markdown should be supported.
-# @description-cn 插件中文描述。
+# zh: 插件中文描述。
 # 支持多行和 Markdown 语法。
 #
 # @main helloworld the entry of program, only the first world is used.
