@@ -1,5 +1,5 @@
 # Hiplot 插件提交器
-# @Copyright 2021 Hiplot team
+# Copyright @ 2021 Hiplot team
 # 工作原理：
 # 1. 读入文件
 # 2. 移除无关行
@@ -28,19 +28,19 @@ tag_list <- splitAt(file_content, grep("# *@", file_content))
 # 针对每一个元素解析标签和内容
 tag_name <- map_chr(tag_list, ~sub("# *@([^ ]+).*", "\\1", .[1]))
 
-parse_tag_name <- function(x) sub("# *@[^ ]+ +([^ ]+).*", "\\1", x[1])
+parse_tag_value <- function(x) sub("# *@[^ ]+ +([^ ]+).*", "\\1", x[1])
 parse_tag_header <- function(x) sub("# *@[^ ]+ +", "", x[1])
 parse_tag_appname <- function(x) {
-  list(type = "appname", value = parse_tag_name(x))
+  list(type = "appname", value = parse_tag_value(x))
 }
 parse_tag_apptype <- function(x) {
-  list(type = "apptype", value = parse_tag_name(x))
+  list(type = "apptype", value = parse_tag_value(x))
 }
 parse_tag_target <- function(x) {
-  list(type = "target", value = parse_tag_name(x))
+  list(type = "target", value = parse_tag_value(x))
 }
 parse_tag_status <- function(x) {
-  list(type = "status", value = parse_tag_name(x))
+  list(type = "status", value = parse_tag_value(x))
 }
 parse_tag_author <- function(x) {
   list(type = "author", value = parse_tag_header(x))
@@ -59,11 +59,11 @@ parse_tag_citation <- function(x) {
 
 }
 parse_tag_version <- function(x) {
-  list(type = "version", value = parse_tag_name(x))
+  list(type = "version", value = parse_tag_value(x))
 }
 parse_tag_description <- function(x) {}
 parse_tag_main <- function(x) {
-  list(type = "main", value = parse_tag_name(x))
+  list(type = "main", value = parse_tag_value(x))
 }
 parse_tag_library <- function(x) {}
 parse_tag_param <- function(x) {}
