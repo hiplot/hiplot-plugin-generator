@@ -39,7 +39,6 @@
 # 上面的介绍包括本行都会被纳入参数英文介绍，即 zh: 未出现在行首前的所有内容一同被纳入 en:。
 # en: a table with at least two numeric columns.
 # zh: 至少两列的数值的表格。（转换为中文参数介绍）
-# 空行解析时移除。
 #
 # @param y [export::extra::text-field::[mpg]]
 # en: a string represent the column mapping to y axis.
