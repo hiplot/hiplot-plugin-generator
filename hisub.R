@@ -17,7 +17,8 @@ file_content <- read_lines("test_parser.R")
 # 过滤无关行
 file_content <- file_content[startsWith(file_content, "#")]
 file_content <- file_content[
-  (grep("# *@hiplot +start", file_content)+1):(grep("# *@hiplot +end", file_content)-1)]
+  (grep("# *@hiplot +start", file_content) + 1):(grep("# *@hiplot +end", file_content) - 1)
+]
 
 # 分隔标签内容
 # src: https://stackoverflow.com/questions/16357962/r-split-numeric-vector-at-position
@@ -26,7 +27,7 @@ splitAt <- function(x, pos) unname(split(x, cumsum(seq_along(x) %in% pos)))
 tag_list <- splitAt(file_content, grep("# *@", file_content))
 
 # 针对每一个元素解析标签和内容
-tag_name <- map_chr(tag_list, ~sub("# *@([^ ]+).*", "\\1", .[1]))
+tag_name <- map_chr(tag_list, ~ sub("# *@([^ ]+).*", "\\1", .[1]))
 
 parse_tag_value <- function(x) sub("# *@[^ ]+ +([^ ]+).*", "\\1", x[1])
 parse_tag_header <- function(x) sub("# *@[^ ]+ +", "", x[1])
@@ -49,9 +50,9 @@ parse_tag_maintainer <- function(x) {
   list(type = "author", value = parse_tag_header(x))
 }
 parse_tag_url <- function(x) {
-  value = parse_tag_header(x)
+  value <- parse_tag_header(x)
   if (sub(" ", "", value) == "NULL") {
-    value = NULL
+    value <- NULL
   }
   list(type = "url", value = value)
 }
@@ -72,16 +73,14 @@ parse_tag_citation <- function(x) {
   list(type = "citation", value = x)
 }
 
-parse_tag_description <- function(x) {
-  x[1] <- parse_tag_header(x[1])
-  if (startsWith(x[1], "#")) x[1] <- ""
+parse_doc <- function(x) {
   if (length(x) > 1) {
-    x[-1] <- sub("^# *$", "\n", x[-1])
-    x[-1] <- sub("^# *", "", x[-1])
+    x <- sub("^# *$", "\n", x)
+    x <- sub("^# *", "", x)
   }
   x <- x[x != ""]
-  idx_en <- grep("en:", x)
-  idx_zh <- grep("zh:", x)
+  idx_en <- grep("^en:", x)
+  idx_zh <- grep("^zh:", x)
 
   if (length(idx_zh) == 0) {
     # ALL records are in English
@@ -93,19 +92,31 @@ parse_tag_description <- function(x) {
   } else if (length(idx_en) > 0) {
     # Both English and Chinese available
     if (idx_en < idx_zh) {
-      x_en <- gsub("en: *", "", paste(x[1:(idx_zh-1)], collapse = " "))
+      x_en <- gsub("en: *", "", paste(x[1:(idx_zh - 1)], collapse = " "))
       x_zh <- gsub("zh: *", "", paste(x[idx_zh:length(x)], collapse = " "))
     } else {
-      x_zh <- gsub("zh: *", "", paste(x[1:(idx_en-1)], collapse = " "))
+      x_zh <- gsub("zh: *", "", paste(x[1:(idx_en - 1)], collapse = " "))
       x_en <- gsub("en: *", "", paste(x[idx_en:length(x)], collapse = " "))
     }
-
   } else {
     # Only Chinese available
     x <- gsub("zh: *", "", x)
     x_zh <- paste(x, collapse = " ")
     x_en <- ""
   }
+  list(
+    en = trimws(x_en, "right"),
+    zh = trimws(x_zh, "right")
+  )
+}
+
+parse_tag_description <- function(x) {
+  x[1] <- parse_tag_header(x[1])
+  if (startsWith(x[1], "#")) x[1] <- ""
+
+  doc_list <- parse_doc(x)
+  x_en <- doc_list$en
+  x_zh <- doc_list$zh
 
   message("Description info parsed.")
   message("en:")
@@ -133,8 +144,54 @@ parse_tag_library <- function(x) {
   list(type = "library", value = x)
 }
 
-parse_tag_param <- function(x) {}
-parse_tag_return <- function(x) {}
+parse_tag_param <- function(x) {
+  param_name <- parse_tag_value(x[1])
+  if (!grepl("\\[export", x[1])) {
+    message("No export detected.")
+    return(NULL) # No returns
+  }
+
+  header <- trimws(parse_tag_header(x[1]))
+  header <- sub("^.*\\[export::(.*)::(.*)::\\[(.*)\\]]", "\\1::\\2::\\3", header)
+  header <- unlist(strsplit(header, "::"))
+
+  doc_list <- parse_doc(x[-1])
+  doc_list <- map(doc_list, ~ sub("  ", "", sub("\n", "", .)))
+
+  list(
+    type = "param",
+    value = list(
+      param_type = header[1],
+      widget_type = header[2],
+      default_value = header[3],
+      en = doc_list$en,
+      zh = doc_list$zh
+    )
+  )
+}
+parse_tag_return <- function(x) {
+  if (!grepl("\\[", x[1])) {
+    return(list(
+      type = "return",
+      value = NULL
+    ))
+  }
+  header <- trimws(parse_tag_header(x[1]))
+  header <- sub("\\[(.*)::\\[(.*)\\]]", "\\1::\\2", header)
+  header <- unlist(strsplit(header, "::"))
+  outfmt <- unlist(strsplit(header[2], ", *"))
+
+  doc_list <- parse_doc(x[-1])
+  list(
+    type = "return",
+    value = list(
+      outtype = header[1],
+      outfmt = outfmt,
+      en = doc_list$en,
+      zh = doc_list$zh
+    )
+  )
+}
 parse_tag_data <- function(x) {
   x <- sub("^# *", "", x)
   x <- x[!grepl("^@|#", x)]
@@ -161,9 +218,13 @@ parse_tag <- function(x, name) {
     library = parse_tag_library(x),
     param = parse_tag_param(x),
     return = parse_tag_return(x),
-    data = parse_tag_data(x))
+    data = parse_tag_data(x)
+  )
 }
 
 content_list <- map2(tag_list, tag_name, parse_tag)
+names(content_list) <- tag_name
+content_list <- compact(content_list)
 
-
+# 注意有多个参数在 names 中同名
+print(content_list)
