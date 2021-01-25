@@ -13,7 +13,10 @@
 # @maintainer a <a@163.com> (one name, one line)
 # @url xxx.com (a link to your project (like github) or NULL)
 # @citation This is a
-# Markdown paragraph to describe citation info.
+# Markdown paragraph to describe
+# the reference #1.
+#
+# Another reference #2.
 # @version 0.1.0 (a semantic version)
 # @description
 # en: A detail description for this plugin,

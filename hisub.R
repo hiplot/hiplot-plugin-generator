@@ -55,20 +55,94 @@ parse_tag_url <- function(x) {
   }
   list(type = "url", value = value)
 }
-parse_tag_citation <- function(x) {
 
-}
 parse_tag_version <- function(x) {
   list(type = "version", value = parse_tag_value(x))
 }
-parse_tag_description <- function(x) {}
+parse_tag_citation <- function(x) {
+  x[1] <- parse_tag_header(x[1])
+  if (startsWith(x[1], "#")) x[1] <- ""
+  if (length(x) > 1) {
+    x[-1] <- sub("^# *$", "\n", x[-1])
+    x[-1] <- sub("^# *", "", x[-1])
+  }
+  x <- paste(x[x != ""], collapse = " ")
+  message("Citation info parsed.")
+  cat(x)
+  list(type = "citation", value = x)
+}
+
+parse_tag_description <- function(x) {
+  x[1] <- parse_tag_header(x[1])
+  if (startsWith(x[1], "#")) x[1] <- ""
+  if (length(x) > 1) {
+    x[-1] <- sub("^# *$", "\n", x[-1])
+    x[-1] <- sub("^# *", "", x[-1])
+  }
+  x <- x[x != ""]
+  idx_en <- grep("en:", x)
+  idx_zh <- grep("zh:", x)
+
+  if (length(idx_zh) == 0) {
+    # ALL records are in English
+    if (length(idx_en) > 0) {
+      x <- gsub("en: *", "", x)
+    }
+    x_en <- paste(x, collapse = " ")
+    x_zh <- ""
+  } else if (length(idx_en) > 0) {
+    # Both English and Chinese available
+    if (idx_en < idx_zh) {
+      x_en <- gsub("en: *", "", paste(x[1:(idx_zh-1)], collapse = " "))
+      x_zh <- gsub("zh: *", "", paste(x[idx_zh:length(x)], collapse = " "))
+    } else {
+      x_zh <- gsub("zh: *", "", paste(x[1:(idx_en-1)], collapse = " "))
+      x_en <- gsub("en: *", "", paste(x[idx_en:length(x)], collapse = " "))
+    }
+
+  } else {
+    # Only Chinese available
+    x <- gsub("zh: *", "", x)
+    x_zh <- paste(x, collapse = " ")
+    x_en <- ""
+  }
+
+  message("Description info parsed.")
+  message("en:")
+  cat(x_en)
+  message("\nzh:")
+  cat(x_zh)
+  list(type = "description", value = list(
+    en = x_en,
+    zh = x_zh
+  ))
+}
+
 parse_tag_main <- function(x) {
   list(type = "main", value = parse_tag_value(x))
 }
-parse_tag_library <- function(x) {}
+parse_tag_library <- function(x) {
+  x[1] <- parse_tag_header(x[1])
+  if (length(x) > 1) {
+    x[-1] <- sub("^#", "", x[-1])
+  }
+  x <- paste(x, collapse = " ")
+  x <- unlist(strsplit(x, split = " "))
+  message("Required packages parsed.")
+  cat(x)
+  list(type = "library", value = x)
+}
+
 parse_tag_param <- function(x) {}
 parse_tag_return <- function(x) {}
-parse_tag_data <- function(x) {}
+parse_tag_data <- function(x) {
+  x <- sub("^# *", "", x)
+  x <- x[!grepl("^@|#", x)]
+  x <- paste(x, collapse = "\n")
+  message("Code to generate data parsed.")
+  cat(x)
+  list(type = "data", value = x)
+}
 
 parse_tag <- function(x, name) {
   switch(
@@ -91,3 +165,5 @@ parse_tag <- function(x, name) {
 }
 
 content_list <- map2(tag_list, tag_name, parse_tag)
+
+
