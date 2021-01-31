@@ -12,7 +12,10 @@ library(readr)
 library(dplyr)
 library(purrr)
 
-file_content <- read_lines("test_parser.R")
+file_content <- read_lines("test.R")
+
+
+# Preprocessing -----------------------------------------------------------
 
 # 过滤无关行
 file_content <- file_content[startsWith(file_content, "#")]
@@ -26,6 +29,10 @@ splitAt <- function(x, pos) unname(split(x, cumsum(seq_along(x) %in% pos)))
 
 tag_list <- splitAt(file_content, grep("# *@", file_content))
 
+
+
+# Parsing content ---------------------------------------------------------
+
 # 针对每一个元素解析标签和内容
 tag_name <- map_chr(tag_list, ~ sub("# *@([^ ]+).*", "\\1", .[1]))
 
@@ -34,8 +41,12 @@ parse_tag_header <- function(x) sub("# *@[^ ]+ +", "", x[1])
 parse_tag_appname <- function(x) {
   list(type = "appname", value = parse_tag_value(x))
 }
-parse_tag_apptype <- function(x) {
-  list(type = "apptype", value = parse_tag_value(x))
+parse_tag_apptitle <- function(x) {
+  list(type = "apptitle",
+       value = list(
+         en = trimws(sub("^# *", "", x[2])),
+         zh = trimws(sub("^# *", "", x[3]))
+       ))
 }
 parse_tag_target <- function(x) {
   list(type = "target", value = parse_tag_value(x))
@@ -205,7 +216,7 @@ parse_tag <- function(x, name) {
   switch(
     name,
     appname = parse_tag_appname(x),
-    apptype = parse_tag_apptype(x),
+    apptitle = parse_tag_apptitle(x),
     target = parse_tag_target(x),
     status = parse_tag_status(x),
     author = parse_tag_author(x),
@@ -232,27 +243,37 @@ print(content_list)
 # Generate plugin files ---------------------------------------------------
 # 标签、参数、控件的设定匹配和设定有难度
 
+# TODO: 暂时不管 label 有什么意义，完成基本的 data.json 和 ui.json 的生成
+# dataArg 暂时不处理
+# 参数的解析！参数对应的 ui 控件！
+
+# Parse parameters
+
 # meta.json
 # Metadata for the plugin
 json_meta <- list(
-  name = list(zh_cn = "", en = ""),
-  intro = list(zh_cn = "", en = ""),
-  src = "",
-  href = "",
-  tag = c("vue"),
+  name = list(zh_cn = content_list$apptitle$value$zh, en = content_list$apptitle$value$en),
+  intro = list(zh_cn = content_list$description$value$zh, en = content_list$description$value$en),
+  #src = "",
+  href = paste0(content_list$target$value, "/", content_list$appname$value),
+  tag = "vue",
   meta = list(
-    score = 4,
-    author = "<your_name>",
-    email = "<your_email>",
-    releaseDate = "2021-01-01",
-    updateDate = "2021-01-01"
+    #score = 4,
+    author = content_list$author$value,
+    email = content_list$maintainer$value,
+    issues = content_list$url$value,
+    releaseDate = as.character(Sys.Date()),
+    updateDate = as.character(Sys.Date()),
+    citation = content_list$citation$value
   )
 )
 
+jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
+
 # data.json
 json_data <- list(
-  module = "basic",
-  tool = "short-name",
+  module = content_list$target$value,
+  tool = content_list$appname$value,
   params = list(
     textarea = list(
       # Multiple dataTable assigned to data, data2, data3, ... in plot.R
@@ -264,7 +285,7 @@ json_data <- list(
         # Match dataTable names in textarea
         # Assign default selected data columns by order
         # toJSON(list(list(value = c("a", "b")), list(value = 1)), auto_unbox = T)
-        datTable = list()
+        #datTable = list()
       ),
       general = list(
         cmd = "",
@@ -285,7 +306,7 @@ json_data <- list(
     config = list(
       data = list(),
       dataArg = list(
-        datTable = list()
+        #datTable = list()
       ),
       general = list(),
       extra = list()
@@ -296,7 +317,10 @@ json_data <- list(
   )
 )
 
+jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
+
 # ui.json
+
 json_ui <- list(
   data = list(
     datTable = list()
@@ -311,6 +335,8 @@ json_ui <- list(
 
   )
 )
+
+jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 
 # "datTable": {
 #   "type": "hiplot-textarea",

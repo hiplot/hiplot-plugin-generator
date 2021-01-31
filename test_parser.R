@@ -6,12 +6,14 @@
 
 # @hiplot start
 # @appname test-plugin (the name is converted to plugin slug, only the fisrt word included)
-# @apptype vue one of vue and shiny. Shiny 的 main, param, return 等标签都会忽略
+# @apptitle Two rows indicating English and Chinese title for the app
+# a test plugin
+# 一个测试插件
 # @target basic (where the plugin should be deployed to, only the first word included)
 # @status new one of new or a link to the hiplot plugin, e.g., https://hiplot.com.cn/basic/heatmap 用来加速审查
 # @author a, b, c (one line)
 # @maintainer a <a@163.com> (one name, one line)
-# @url xxx.com (a link to your project (like github) or NULL)
+# @url xxx.com (a link to your project (like github) for reporting issues)
 # @citation This is a
 # Markdown paragraph to describe
 # the reference #1.
@@ -30,15 +32,22 @@
 # @param data [export::<param-type>::<widget-type>::[<default-value>]]
 # Pay attention:
 #   参数名后接参数接口设定，下一行才开始描述参数。
-#   Valid <widget-type> includes select, switch, slider, text-field,
-#   (需要补充，特别是数据表以及自动选择表格列名的控件类型（例子：https://hiplot.com.cn/basic/ezcox）)
-#   Valid <param-type> includes general, extra, （数据表和其列名选择是否作为一个新的参数类型？）
-#   Valid <default-value> depends one the <widget-type>:
-#     - for type 'select': string/numeric options separated by comma, e.g., str:a, b, c, num: 1, 1.5, 2
-#         example: [export::extra::select::[int: 1, 1.5, 2]]
-#     - for type 'switch': TRUE/true or FALSE/false
-#     - for type 'slider': start:end:step, e.g., 2:10:1
+#   Valid <widget-type> includes hiplot-textarea, select, switch, slider, text-field
+#   (例子：https://hiplot.com.cn/basic/ezcox)
+#   Valid <param-type> includes data, dataArg, general, extra
+#     - data (also data2, data3, ...) is the Excel-like data table for user input.
+#     - dataArg is used for setting the default selected column names.
+#     - general is for general setting like title, figure width/height, theme.
+#     - extra is for custom setting.
+#   Valid <default-value> depends one the <widget-type>, use json-like format:
+#     - for type 'hiplot-textarea' (typically used for param-type 'data'): true or false
+#                for setting if the datatable is required or optional.
+#     - for type 'select': string/numeric options
+#         example: [export::extra::select::[{"all": [1, 1.5, 2], "default": [1], "multiple": false}]]
+#     - for type 'switch': true or false
+#     - for type 'slider': [start, end, step], e.g., [2, 10, 1]
 #     - for type 'text-field': any string, even void, i.e., [export::extra::text-field::[]]
+#     - for type 'data' (also 'data2', 'data3', ...), only used for param-type 'dataArg' (TODO: 该怎么规定此处的参数值)
 #
 # 上面的介绍包括本行都会被纳入参数英文介绍，即 zh: 未出现在行首前的所有内容一同被纳入 en:。
 # en: a table with at least two numeric columns.
@@ -71,7 +80,7 @@
 
 library(ggplot2)
 helloworld <- function(data, x, y = "mpg") {
-  p <- ggplot(data, aes_string(x = x, y = mpg))
+  p <- ggplot(data, aes_string(x = x, y = y))
   p <- p + geom_point()
   # Here export a ggplot object
   return(p)
