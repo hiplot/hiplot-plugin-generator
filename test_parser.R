@@ -40,19 +40,20 @@
 #     - extra is for custom setting.
 #   Valid <default-value> depends one the <widget-type>, use json-like format:
 #     - for type 'hiplot-textarea' (typically used for param-type 'data'): true or false
-#                for setting if the datatable is required or optional.
+#                for setting if the datatable is required or optional and corresponding example file.
+#                e.g. [{"required": true, "example": "data.txt"}]
 #     - for type 'select': string/numeric options
 #         example: [export::extra::select::[{"all": [1, 1.5, 2], "default": [1], "multiple": false}]]
 #     - for type 'switch': true or false
-#     - for type 'slider': [start, end, step], e.g., [2, 10, 1]
-#     - for type 'text-field': any string, even void, i.e., [export::extra::text-field::[]]
+#     - for type 'slider': [{min, max, step}], e.g., [{"min":0.5, "max":5, "step":0.5]
+#     - for type 'text-field': any string, even void, i.e., [export::extra::text-field::[{"value":""}]]
 #     - for type 'data' (also 'data2', 'data3', ...), only used for param-type 'dataArg' (TODO: 该怎么规定此处的参数值)
 #
 # 上面的介绍包括本行都会被纳入参数英文介绍，即 zh: 未出现在行首前的所有内容一同被纳入 en:。
 # en: a table with at least two numeric columns.
 # zh: 至少两列的数值的表格。（转换为中文参数介绍）
 #
-# @param y [export::extra::text-field::[mpg]]
+# @param y [export::extra::text-field::["mpg"]]
 # en: a string represent the column mapping to y axis.
 # zh: 一个指示映射到 y 轴的列名
 #
