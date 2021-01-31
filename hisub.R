@@ -228,3 +228,110 @@ content_list <- compact(content_list)
 
 # 注意有多个参数在 names 中同名
 print(content_list)
+
+# Generate plugin files ---------------------------------------------------
+# 标签、参数、控件的设定匹配和设定有难度
+
+# meta.json
+# Metadata for the plugin
+json_meta <- list(
+  name = list(zh_cn = "", en = ""),
+  intro = list(zh_cn = "", en = ""),
+  src = "",
+  href = "",
+  tag = c("vue"),
+  meta = list(
+    score = 4,
+    author = "<your_name>",
+    email = "<your_email>",
+    releaseDate = "2021-01-01",
+    updateDate = "2021-01-01"
+  )
+)
+
+# data.json
+json_data <- list(
+  module = "basic",
+  tool = "short-name",
+  params = list(
+    textarea = list(
+      # Multiple dataTable assigned to data, data2, data3, ... in plot.R
+      datTable = ""
+    ),
+    config = list(
+      data = list(),
+      dataArg = list(
+        # Match dataTable names in textarea
+        # Assign default selected data columns by order
+        # toJSON(list(list(value = c("a", "b")), list(value = 1)), auto_unbox = T)
+        datTable = list()
+      ),
+      general = list(
+        cmd = "",
+        imageExportType = c("png", "pdf"),
+        size = list(
+          width = 4,
+          height = 5
+        ),
+        theme = "theme_pubr",
+        title = ""
+      ),
+      extra = list(
+        # Common extra parameter setting
+      )
+    )
+  ),
+  exampleData = list(
+    config = list(
+      data = list(),
+      dataArg = list(
+        datTable = list()
+      ),
+      general = list(),
+      extra = list()
+    ),
+    textarea = list(
+
+    )
+  )
+)
+
+# ui.json
+json_ui <- list(
+  data = list(
+    datTable = list()
+  ),
+  dataArg = list(
+    datTable = list()
+  ),
+  general = list(
+
+  ),
+  extra - list(
+
+  )
+)
+
+# "datTable": {
+#   "type": "hiplot-textarea",
+#   "required": true,
+#   "label": "messages.extra.dataTable"
+# }
+
+# {
+#   "label": "messages.basic.common.controls",
+#   "blackItems": [
+#     "time",
+#     "status"
+#   ],
+#   "norequire": true
+# }
+
+# "drop_controls": {
+#   "type": "switch",
+#   "label": "messages.basic.common.drop_controls"
+# }
+
+# plot.R
+
+
