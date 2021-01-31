@@ -37,7 +37,6 @@
 #   Valid <param-type> includes data, dataArg, general, extra
 #     - data (also data2, data3, ...) is the Excel-like data table for user input.
 #     - dataArg is used for setting the default selected column names.
-#     - general is for general setting like title, figure width/height, theme.
 #     - extra is for custom setting.
 #   Valid <default-value> depends one the <widget-type>, use json-like format:
 #     - for type 'hiplot-textarea' (typically used for param-type 'data'): true or false
@@ -59,14 +58,17 @@
 #
 # @param zzz 没有采用方括号标记的参数不被解析导出
 #
-# @return [<result-type>::[<output-format>]]
+# @return [<result-type>::[<output-format>]::[<output-setting>]]
 # Pay attention:
-#   Valid <result-type> includes ggplot, basic, other (more?)
+#   Valid <result-type> includes ggplot, basic, other (for file output?)
 #   Valid <output-format> includes general, pdf, png, tiff, zip, file, directory.
 #         Multiple options are valid.
-#         'general' 包含目前 hiplot 插件常见输出选项
+#         'general' 包含目前 hiplot 插件常见图片输出选项
 #         'file'（单个结果文件）和 'directory'（多个结果文件）用于支持一些工具的输出，像 gistic2 这种
 #         使用它们时，主函数需要支持一个结果文件/目录路径设定，使用 hiplot_file/hiplot_outdir
+#   When <result-type> is other, <output-setting> set the parameter corresponding to
+#        output path; otherwise, <output-setting> set default figure size and theme.
+#        e.g., [{"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}]
 # en: Result descript in English.
 # zh: 结果的中文描述
 # @data
