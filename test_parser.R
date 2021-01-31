@@ -45,8 +45,8 @@
 #     - for type 'select': string/numeric options
 #         example: [export::extra::select::[{"all": [1, 1.5, 2], "default": [1], "multiple": false}]]
 #     - for type 'switch': true or false
-#     - for type 'slider': [{min, max, step}], e.g., [{"min":0.5, "max":5, "step":0.5]
-#     - for type 'text-field': any string, even void, i.e., [export::extra::text-field::[{"value":""}]]
+#     - for type 'slider': [{default, min, max, step}], e.g., [{"default":2, "min":0.5, "max":5, "step":0.5]
+#     - for type 'text-field': any string, even void, i.e., [export::extra::text-field::[{"default":""}]]
 #     - for type 'data' (also 'data2', 'data3', ...), only used for param-type 'dataArg' (TODO: 该怎么规定此处的参数值)
 #
 # 上面的介绍包括本行都会被纳入参数英文介绍，即 zh: 未出现在行首前的所有内容一同被纳入 en:。
