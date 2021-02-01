@@ -79,7 +79,7 @@ parse_tag_citation <- function(x) {
     x[-1] <- sub("^# *", "", x[-1])
   }
   x <- paste(x[x != ""], collapse = " ")
-  message("Citation info parsed.")
+  message("\nCitation info parsed.")
   cat(x)
   list(type = "citation", value = x)
 }
@@ -129,7 +129,7 @@ parse_tag_description <- function(x) {
   x_en <- doc_list$en
   x_zh <- doc_list$zh
 
-  message("Description info parsed.")
+  message("\nDescription info parsed.")
   message("en:")
   cat(x_en)
   message("\nzh:")
@@ -150,20 +150,20 @@ parse_tag_library <- function(x) {
   }
   x <- paste(x, collapse = " ")
   x <- unlist(strsplit(x, split = " "))
-  message("Required packages parsed.")
+  message("\nRequired packages parsed.")
   cat(x)
   list(type = "library", value = x)
 }
 
 parse_tag_param <- function(x) {
   param_name <- parse_tag_value(x[1])
-  if (!grepl("\\[export", x[1])) {
-    message("No export detected.")
+  if (!grepl("export::", x[1])) {
+    message("\nNo export detected.")
     return(NULL) # No returns
   }
 
   header <- trimws(parse_tag_header(x[1]))
-  header <- sub("^.*\\[export::(.*)::(.*)::\\[(.*)\\]]", "\\1::\\2::\\3", header)
+  header <- sub("^.*export::", "", header)
   header <- unlist(strsplit(header, "::"))
 
   doc_list <- parse_doc(x[-1])
@@ -173,22 +173,23 @@ parse_tag_param <- function(x) {
     type = "param",
     value = list(
       param_type = header[1],
+      param_name = param_name,
       widget_type = header[2],
-      default_value = header[3],
+      default_value = jsonlite::fromJSON(header[3]),
       en = doc_list$en,
       zh = doc_list$zh
     )
   )
 }
+
 parse_tag_return <- function(x) {
-  if (!grepl("\\[", x[1])) {
+  if (!grepl("::", x[1])) {
     return(list(
       type = "return",
       value = NULL
     ))
   }
   header <- trimws(parse_tag_header(x[1]))
-  header <- sub("\\[(.*)::\\[(.*)\\]]", "\\1::\\2", header)
   header <- unlist(strsplit(header, "::"))
   outfmt <- unlist(strsplit(header[2], ", *"))
 
@@ -198,16 +199,18 @@ parse_tag_return <- function(x) {
     value = list(
       outtype = header[1],
       outfmt = outfmt,
+      outsetting = jsonlite::fromJSON(header[3]),
       en = doc_list$en,
       zh = doc_list$zh
     )
   )
 }
+
 parse_tag_data <- function(x) {
   x <- sub("^# *", "", x)
   x <- x[!grepl("^@|#", x)]
   x <- paste(x, collapse = "\n")
-  message("Code to generate data parsed.")
+  message("\nCode to generate data parsed.")
   cat(x)
   list(type = "data", value = x)
 }
@@ -233,12 +236,12 @@ parse_tag <- function(x, name) {
   )
 }
 
-content_list <- map2(tag_list, tag_name, parse_tag)
-names(content_list) <- tag_name
-content_list <- compact(content_list)
+a <- map2(tag_list, tag_name, parse_tag)
+names(a) <- tag_name
+a <- compact(a)
 
 # 注意有多个参数在 names 中同名
-print(content_list)
+print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
 
 # Generate plugin files ---------------------------------------------------
 # 标签、参数、控件的设定匹配和设定有难度
@@ -252,19 +255,19 @@ print(content_list)
 # meta.json
 # Metadata for the plugin
 json_meta <- list(
-  name = list(zh_cn = content_list$apptitle$value$zh, en = content_list$apptitle$value$en),
-  intro = list(zh_cn = content_list$description$value$zh, en = content_list$description$value$en),
+  name = list(zh_cn = a$apptitle$value$zh, en = a$apptitle$value$en),
+  intro = list(zh_cn = a$description$value$zh, en = a$description$value$en),
   #src = "",
-  href = paste0(content_list$target$value, "/", content_list$appname$value),
+  href = paste0(a$target$value, "/", a$appname$value),
   tag = "vue",
   meta = list(
     #score = 4,
-    author = content_list$author$value,
-    email = content_list$maintainer$value,
-    issues = content_list$url$value,
+    author = a$author$value,
+    email = a$maintainer$value,
+    issues = a$url$value,
     releaseDate = as.character(Sys.Date()),
     updateDate = as.character(Sys.Date()),
-    citation = content_list$citation$value
+    citation = a$citation$value
   )
 )
 
@@ -272,8 +275,8 @@ jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
 
 # data.json
 json_data <- list(
-  module = content_list$target$value,
-  tool = content_list$appname$value,
+  module = a$target$value,
+  tool = a$appname$value,
   params = list(
     textarea = list(
       # Multiple dataTable assigned to data, data2, data3, ... in plot.R

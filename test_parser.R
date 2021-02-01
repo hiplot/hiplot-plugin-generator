@@ -59,9 +59,9 @@
 #
 # @param zzz 没有采用方括号标记的参数不被解析导出
 #
-# @return [<result-type>::[<output-format>]::[<output-setting>]]
+# @return <output-type>::[<output-format>]::<output-setting>
 # Pay attention:
-#   Valid <result-type> includes ggplot, basic, other (for file output?)
+#   Valid <output-type> includes ggplot, basic, other (for file output?)
 #   Valid <output-format> includes general, pdf, png, tiff, zip, file, directory.
 #         Multiple options are valid.
 #         'general' 包含目前 hiplot 插件常见图片输出选项
@@ -69,8 +69,8 @@
 #         使用它们时，主函数需要支持一个结果文件/目录路径设定，使用 hiplot_file/hiplot_outdir
 #   When <result-type> is other, <output-setting> set the parameter corresponding to
 #        output path; otherwise, <output-setting> set default figure size and theme.
-#        e.g., [{"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}]
-# en: Result descript in English.
+#        e.g., {"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
+# en: Result description in English.
 # zh: 结果的中文描述
 # @data
 # # 此处可以编写生成示例数据的代码
