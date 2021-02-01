@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # Hiplot 插件提交器
 # Copyright @ 2021 Hiplot team
 # 工作原理：
@@ -7,13 +8,19 @@
 # 4. 解析所有内容并整理输出，为生成 .json 配置提供内容
 # 5. 生成 .json (data.json, meta.json, ui.json)
 # 6. 基于配置和输入文件生成 plot.R
+#
+# Test: ./hisub.R test.R test-plugin
+
+Args <- commandArgs(trailingOnly = TRUE)
 
 library(readr)
 library(dplyr)
 library(purrr)
+library(jsonlite)
 
-file_content <- read_lines("test.R")
-
+fc <- file_content <- read_lines(Args[1])
+outdir <- Args[2]
+dir.create(outdir)
 
 # Preprocessing -----------------------------------------------------------
 
@@ -78,7 +85,7 @@ parse_tag_citation <- function(x) {
     x[-1] <- sub("^# *$", "\n", x[-1])
     x[-1] <- sub("^# *", "", x[-1])
   }
-  x <- paste(x[x != ""], collapse = " ")
+  x <- paste(x[x != ""], collapse = "\n")
   message("\nCitation info parsed.")
   cat(x)
   list(type = "citation", value = x)
@@ -241,22 +248,83 @@ names(a) <- tag_name
 a <- compact(a)
 
 # 注意有多个参数在 names 中同名
-print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
+#print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
+
+
+# Generate data files -----------------------------------------------------
+
+if ("data" %in% names(a)) {
+  message("Generating data file...")
+  old_wd <- getwd()
+  setwd(outdir)
+  eval(parse(text = a$data$value))
+  setwd(old_wd)
+}
 
 # Generate plugin files ---------------------------------------------------
 # 标签、参数、控件的设定匹配和设定有难度
 
+message("Generating plugin files...")
 # TODO: 暂时不管 label 有什么意义，完成基本的 data.json 和 ui.json 的生成
 # dataArg 暂时不处理
 # 参数的收集！参数对应的 ui 控件！
+set_widget <- function(w) {
+  type <- w$widget_type
+  c(list(
+    type = type,
+    label = list(
+      en = w$en,
+      zh_cn = w$zh
+    )
+  ), w$default_value[!names(w$default_value) %in% "default"])
+}
+
 collect_params <- function(x) {
   all_args <- x[names(x) == "param"]
   # 根据参数类型和控件类型生成 data.json 和 ui.json 所需数据
-  # 参数类型：data, dataArg, general, extra
-  # 控件类型：hiplot-textarea, select, switch, slider, text-field
-}
-a$params <-collect_params(x)
+  # 参数类型：data, dataArg(暂时不实现),
+  # general(通过return实现，以避免设置函数参数，只设定主题和图片大小), extra
+  # 这里实现 data 和 extra 即可
+  # 控件类型：hiplot-textarea, select, switch, slider, text-field, ...
 
+  # data.json 需要生成的是默认参数值
+  # 一处在 params 里，一处在 exampleData 里
+  #
+  # ui.json 需要生成的是参数的 ui 配置信息
+  # ?? label 属性是必需的吗？
+
+  params_textarea <- list()
+  params_extra <- list()
+  example_textarea <- list()
+  #example_extra <- list()
+  ui_data <- list()
+  ui_extra <- list()
+
+  map(all_args, function(y) {
+    y <- y$value
+    if (y$param_type == "data") {
+      params_textarea[[y$param_name]] <<- ""
+      if (!is.null(y$default_value$default)) {
+        example_textarea[[y$param_name]] <<- paste(read_lines(file.path(outdir, y$default_value$default)), collapse = "\n")
+      }
+      ui_data[[y$param_name]] <<- set_widget(y)
+    } else if (y$param_type == "extra") {
+      params_extra[[y$param_name]] <<- y$default_value$default
+      ui_extra[[y$param_name]] <<- set_widget(y)
+    }
+    NULL
+  })
+
+  list(
+    params_textarea = params_textarea,
+    params_extra = params_extra,
+    example_textarea = example_textarea,
+    ui_data = ui_data,
+    ui_extra = ui_extra
+  )
+}
+
+a$params <- collect_params(a)
 
 # meta.json
 # Metadata for the plugin
@@ -277,25 +345,25 @@ json_meta <- list(
   )
 )
 
-json_meta <- jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
+message("  meta.json")
+#jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
+write_json(json_meta, file.path(outdir, "meta.json"), auto_unbox = TRUE, pretty = TRUE)
 
 # data.json
 json_data <- list(
   module = a$target$value,
   tool = a$appname$value,
   params = list(
-    textarea = list(
-      # Multiple dataTable assigned to data, data2, data3, ... in plot.R
-      datTable = ""
-    ),
+    # Multiple dataTable assigned to data, data2, data3, ... in plot.R
+    textarea = a$params$params_textarea,
     config = list(
-      data = list(),
-      dataArg = list(
-        # Match dataTable names in textarea
-        # Assign default selected data columns by order
-        # toJSON(list(list(value = c("a", "b")), list(value = 1)), auto_unbox = T)
-        #datTable = list()
-      ),
+      # data = list(),
+      # dataArg = list(
+      #   # Match dataTable names in textarea
+      #   # Assign default selected data columns by order
+      #   # toJSON(list(list(value = c("a", "b")), list(value = 1)), auto_unbox = T)
+      #   #datTable = list()
+      # ),
       general = list(
         cmd = "",
         imageExportType = a$return$value$outfmt,
@@ -305,48 +373,46 @@ json_data <- list(
         ),
         theme = if (a$return$value$outsetting$theme_support) {
           a$return$value$outsetting$theme_default
-        } else NULL,
+        } else NULL
       ),
-      extra = list(
-        # Common extra parameter setting
-      )
+      # Common extra parameter setting
+      extra = a$params$params_extra
     )
   ),
   exampleData = list(
     config = list(
-      data = list(),
-      dataArg = list(
-        #datTable = list()
-      ),
-      general = list(),
-      extra = list()
+      # data = list(),
+      # dataArg = list(
+      #   #datTable = list()
+      # ),
+      # general = list(),
+      # extra = list()
+     "reserved_" = TRUE # 无用处，保留 config 结构
     ),
-    textarea = list(
-
-    )
+    textarea = a$params$example_textarea
   )
 )
 
-json_data <- jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
+message("  data.json")
+#jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
+write_json(json_data, file.path(outdir, "data.json"), auto_unbox = TRUE, pretty = TRUE)
 
 # ui.json
 
 json_ui <- list(
-  data = list(
-    datTable = list()
-  ),
-  dataArg = list(
-    datTable = list()
-  ),
-  general = list(
-
-  ),
-  extra - list(
-
-  )
+  data = a$params$ui_data,
+  # dataArg = list(
+  #   datTable = list()
+  # ),
+  # general = list(
+  #
+  # ),
+  extra = a$params$ui_extra
 )
 
-json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
+message("  ui.json")
+#json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
+write_json(json_ui, file.path(outdir, "ui.json"), auto_unbox = TRUE, pretty = TRUE)
 
 # "datTable": {
 #   "type": "hiplot-textarea",
@@ -369,5 +435,56 @@ json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 # }
 
 # plot.R
+# 保留输入脚本
+message("  source.R")
+write_lines(fc, file.path(outdir, "source.R"))
+# 生成 plot.R 进行调用
+args_pairs <- map(
+  a[names(a) == "param"],
+  ~c(.$value$param_type,
+     .$value$param_name))
 
+# 确定 data 的匹配
+# 如果开发时数据表使用 data, data2, data3 没有问题
+# 但如果用户自定义数据表名，这里只能
+# 按顺序生成给 data, data2, ...
+# !!后续文档要描述该情况，推荐按函数设定顺序写参数说明
+data_idx <- 1
+args_pairs2 = c()
+for (i in args_pairs) {
+  if (i[1] == "data") {
+    if (data_idx == 1) {
+      z <- paste(i[1], "= data, ")
+    } else {
+      z <- paste(i[1], "=", paste0("data", data_idx, ","))
+    }
+    data_idx = data_idx + 1
+  } else if (i[1] == "extra") {
+    z <- paste(i[2], "=", paste0("conf$extra$", i[2], ","))
+  }
+  args_pairs2 <- c(args_pairs2, z)
+}
+args_pairs2[length(args_pairs2)] <- sub(",", "", args_pairs2[length(args_pairs2)])
 
+plot_r <- c(
+  'source("source.R")\n',
+  paste(
+    paste0(a$main$value, "("),
+    paste(args_pairs2, collapse = "\n"),
+    ")", sep = "\n"
+  )
+)
+
+# 增加 ggplot2 的配置
+# 基础绘图后续再看看
+# 可以在函数调用前后使用 pdf(), dev.off()
+if (a$return$value$outtype == "ggplot") {
+  plot_r <- c(
+    plot_r,
+    '\nexport_single(p, opt, conf)')
+}
+
+message("  plot.R")
+write_lines(plot_r, file.path(outdir, "plot.R"))
+
+# Rscript /Users/wsx/Documents/GitHub/scripts-basic/r/run_debug.R -c test-plugin/data.json -i test-plugin/data.txt -o test-plugin/test -t test-plugin --enableExample
