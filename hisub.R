@@ -191,7 +191,7 @@ parse_tag_return <- function(x) {
   }
   header <- trimws(parse_tag_header(x[1]))
   header <- unlist(strsplit(header, "::"))
-  outfmt <- unlist(strsplit(header[2], ", *"))
+  outfmt <- jsonlite::fromJSON(header[2])
 
   doc_list <- parse_doc(x[-1])
   list(
@@ -248,9 +248,15 @@ print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
 
 # TODO: 暂时不管 label 有什么意义，完成基本的 data.json 和 ui.json 的生成
 # dataArg 暂时不处理
-# 参数的解析！参数对应的 ui 控件！
+# 参数的收集！参数对应的 ui 控件！
+collect_params <- function(x) {
+  all_args <- x[names(x) == "param"]
+  # 根据参数类型和控件类型生成 data.json 和 ui.json 所需数据
+  # 参数类型：data, dataArg, general, extra
+  # 控件类型：hiplot-textarea, select, switch, slider, text-field
+}
+a$params <-collect_params(x)
 
-# Parse parameters
 
 # meta.json
 # Metadata for the plugin
@@ -271,7 +277,7 @@ json_meta <- list(
   )
 )
 
-jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
+json_meta <- jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
 
 # data.json
 json_data <- list(
@@ -292,13 +298,14 @@ json_data <- list(
       ),
       general = list(
         cmd = "",
-        imageExportType = c("png", "pdf"),
+        imageExportType = a$return$value$outfmt,
         size = list(
-          width = 4,
-          height = 5
+          width = a$return$value$outsetting$width,
+          height = a$return$value$outsetting$height
         ),
-        theme = "theme_pubr",
-        title = ""
+        theme = if (a$return$value$outsetting$theme_support) {
+          a$return$value$outsetting$theme_default
+        } else NULL,
       ),
       extra = list(
         # Common extra parameter setting
@@ -320,7 +327,7 @@ json_data <- list(
   )
 )
 
-jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
+json_data <- jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
 
 # ui.json
 
@@ -339,7 +346,7 @@ json_ui <- list(
   )
 )
 
-jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
+json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 
 # "datTable": {
 #   "type": "hiplot-textarea",
