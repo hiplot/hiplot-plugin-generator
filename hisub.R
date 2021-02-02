@@ -11,17 +11,28 @@
 #
 # Test: ./hisub.R test.R test-plugin
 
-Args <- commandArgs(trailingOnly = TRUE)
-
 library(readr)
 library(dplyr)
 library(purrr)
 library(jsonlite)
 
-fc <- file_content <- read_lines(Args[1])
-outdir <- Args[2]
-dir.create(outdir)
+Args <- commandArgs(trailingOnly = TRUE)
 
+# 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
+# 已准备好的数据文件或其他所需脚本
+fc <- file_content <- read_lines(Args[1])
+if (length(Args) > 2) {
+  outdir <- Args[length(Args)]
+  flag = TRUE
+} else {
+  outdir <- Args[2]
+  flag = FALSE
+}
+
+dir.create(outdir, recursive = TRUE)
+if (flag) {
+  file.copy(Args[2:(length(Args)-1)], outdir)
+}
 # Preprocessing -----------------------------------------------------------
 
 # 过滤无关行
@@ -35,8 +46,6 @@ file_content <- file_content[
 splitAt <- function(x, pos) unname(split(x, cumsum(seq_along(x) %in% pos)))
 
 tag_list <- splitAt(file_content, grep("# *@", file_content))
-
-
 
 # Parsing content ---------------------------------------------------------
 
