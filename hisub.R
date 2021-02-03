@@ -560,10 +560,15 @@ plot_r <- c(
 # 处理非 ggplot 图
 if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
   plot_r[2] <- paste(
-    "as.ggplot(~",
+    "p <- as.ggplot(~",
     plot_r[2],
     ")",
     sep = ""
+  )
+} else if (a$return$value$outtype == "ggplot") {
+  plot_r[2] <- paste0(
+    "p <- ",
+    plot_r[2]
   )
 }
 
