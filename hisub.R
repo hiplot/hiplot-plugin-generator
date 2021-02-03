@@ -573,10 +573,15 @@ if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
 }
 
 # 增加对图片的配置
-if (a$return$value$outtype %in% c("ggplot", "plot", "basic", "grid")) {
+if (a$return$value$outtype %in% c("ggplot", "plot")) {
   plot_r <- c(
     plot_r,
     "\nexport_single(p, opt, conf)"
+  )
+} else if (a$return$value$outtype == "directory") {
+  plot_r <- c(
+    plot_r,
+    "\nexport_directory(p, opt, conf)"
   )
 }
 
