@@ -17,8 +17,8 @@ suppressMessages(library(purrr))
 suppressMessages(library(jsonlite))
 suppressMessages(library(styler))
 
-#Args <- commandArgs(trailingOnly = TRUE)
-Args <- c("test.R", "test-plugin2")
+Args <- commandArgs(trailingOnly = TRUE)
+#Args <- c("test.R", "test-plugin2")
 
 # 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
 # 已准备好的数据文件或其他所需脚本
@@ -437,16 +437,19 @@ json_data <- list(
     config = list(
       dataArg = a$params$params_dataArg,
       # data = list(),
-      general = list(
-        cmd = "",
-        imageExportType = a$return$value$outfmt,
-        size = list(
-          width = a$return$value$outsetting$width,
-          height = a$return$value$outsetting$height
+      general = c(
+        list(
+          cmd = "",
+          imageExportType = a$return$value$outfmt,
+          size = list(
+            width = a$return$value$outsetting$width,
+            height = a$return$value$outsetting$height
+          ),
+          theme = if (a$return$value$outsetting$theme_support) {
+            a$return$value$outsetting$theme_default
+          } else NULL
         ),
-        theme = if (a$return$value$outsetting$theme_support) {
-          a$return$value$outsetting$theme_default
-        } else NULL
+        a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height", "theme_support", "theme_default")]
       ),
       # Common extra parameter setting
       extra = a$params$params_extra
