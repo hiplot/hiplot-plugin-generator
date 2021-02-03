@@ -274,7 +274,7 @@ if ("data" %in% names(a)) {
 # 标签、参数、控件的设定匹配和设定有难度
 
 message("Generating plugin files...")
-# TODO: 暂时不管 label 有什么意义，完成基本的 data.json 和 ui.json 的生成
+# TODO:
 # dataArg 暂时不处理
 # 参数的收集！参数对应的 ui 控件！
 set_widget <- function(w) {
@@ -300,7 +300,6 @@ collect_params <- function(x) {
   # 一处在 params 里，一处在 exampleData 里
   #
   # ui.json 需要生成的是参数的 ui 配置信息
-  # ?? label 属性是必需的吗？
 
   params_textarea <- list()
   params_extra <- list()
@@ -308,6 +307,14 @@ collect_params <- function(x) {
   #example_extra <- list()
   ui_data <- list()
   ui_extra <- list()
+
+  j <- 1
+  for (i in seq_along(all_args)) {
+    if (all_args[[i]]$value$param_type == "data") {
+      all_args[[i]]$value$param_name <- paste0(j, "-", all_args[[i]]$value$param_name)
+      j <- j + 1
+    }
+  }
 
   map(all_args, function(y) {
     y <- y$value
