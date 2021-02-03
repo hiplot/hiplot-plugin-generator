@@ -11,10 +11,11 @@
 #
 # Test: ./hisub.R test.R test-plugin
 
-library(readr)
-library(dplyr)
-library(purrr)
-library(jsonlite)
+suppressMessages(library(readr))
+suppressMessages(library(dplyr))
+suppressMessages(library(purrr))
+suppressMessages(library(jsonlite))
+suppressMessages(library(styler))
 
 Args <- commandArgs(trailingOnly = TRUE)
 
@@ -491,10 +492,18 @@ plot_r <- c(
   )
 )
 
-# 增加 ggplot2 的配置
-# 基础绘图后续再看看
-# 可以在函数调用前后使用 pdf(), dev.off()
-if (a$return$value$outtype == "ggplot") {
+# 处理非 ggplot 图
+if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
+  plot_r[2] <- paste(
+    "as.ggplot(~",
+    plot_r[2],
+    ")",
+    sep = ""
+  )
+}
+
+# 增加对图片的配置
+if (a$return$value$outtype %in% c("ggplot", "plot", "basic", "grid")) {
   plot_r <- c(
     plot_r,
     '\nexport_single(p, opt, conf)')
@@ -502,5 +511,6 @@ if (a$return$value$outtype == "ggplot") {
 
 message("  plot.R")
 write_lines(plot_r, file.path(outdir, "plot.R"))
+style_file(file.path(outdir, "plot.R"))
 
 # Rscript /Users/wsx/Documents/GitHub/scripts-basic/r/run_debug.R -c test-plugin/data.json -i test-plugin/data.txt -o test-plugin/test -t test-plugin --enableExample

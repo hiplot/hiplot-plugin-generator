@@ -8,7 +8,7 @@
 # @target basic
 # @status new
 # @author a, b, c
-# @maintainer a <a@163.com>
+# @maintainer <a@163.com>
 # @url xxx.com
 # @citation
 # - reference #1.
@@ -41,7 +41,7 @@
 # zh: 添加线图。
 # @param zzz 没有采用方括号标记的参数不被解析导出，可以仅用于注释。
 #
-# @return ggplot::["pdf", "png", "tiff"]::{"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
+# @return plot::["pdf", "png", "tiff"]::{"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
 # en: Generate a dot plot.
 # zh: 生成一幅点图。
 # @data

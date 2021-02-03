@@ -61,7 +61,7 @@
 #
 # @return <output-type>::[<output-format>]::<output-setting>
 # Pay attention:
-#   Valid <output-type> includes ggplot, basic, other (for file output?)
+#   Valid <output-type> includes ggplot, plot, other (for file output?)
 #   Valid <output-format> includes general, pdf, png, tiff, zip, file, directory.
 #         Multiple options are valid.
 #         'general' 包含目前 hiplot 插件常见图片输出选项
@@ -69,6 +69,7 @@
 #         使用它们时，主函数需要支持一个结果文件/目录路径设定，使用 hiplot_file/hiplot_outdir
 #   When <result-type> is other, <output-setting> set the parameter corresponding to
 #        output path; otherwise, <output-setting> set default figure size and theme.
+#        还有颜色、字体
 #        e.g., {"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
 # en: Result description in English.
 # zh: 结果的中文描述
