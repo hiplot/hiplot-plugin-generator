@@ -31,7 +31,7 @@ if (length(Args) > 2) {
   flag <- FALSE
 }
 
-dir.create(outdir, recursive = TRUE)
+if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
 if (flag) {
   file.copy(Args[2:(length(Args) - 1)], outdir)
 }
@@ -584,4 +584,4 @@ write_lines(plot_r, file.path(outdir, "plot.R"), append = TRUE)
 
 style_file(file.path(outdir, "plot.R"))
 
-# Rscript /Users/wsx/Documents/GitHub/scripts-basic/r/run_debug.R -c test-plugin/data.json -i test-plugin/data.txt -o test-plugin/test -t test-plugin --enableExample
+# output file

@@ -62,7 +62,7 @@
 #
 # @return <output-type>::[<output-format>]::<output-setting>
 # Pay attention:
-#   Valid <output-type> includes ggplot, plot, other (for file output?)
+#   Valid <output-type> includes ggplot, plot, directory (plotly, pptx??)
 #   Valid <output-format> includes general, pdf, png, tiff, zip, file, directory.
 #         Multiple options are valid.
 #         'general' 包含目前 hiplot 插件常见图片输出选项
