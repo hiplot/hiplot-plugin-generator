@@ -46,7 +46,7 @@
 # @param controls export::dataArg::data::{"index":2, "default":"age", "blackItems":["time","status"], "required":false}
 # en: Controls
 # zh: 控制变量
-# @param vars_to_show export::dataArg::data::{"index":3, "blackItems":["time","status"], "required":false}
+# @param vars_to_show export::dataArg::data::{"index":3, "blackItems":["time","status"], "required":false, "individual":true}
 # en: Select Show Variables
 # zh: 展示变量
 # @param merge_models export::extra::switch::{"default": false}

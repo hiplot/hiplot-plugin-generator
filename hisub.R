@@ -494,8 +494,8 @@ write_json(json_ui, file.path(outdir, "ui.json"),
 
 # plot.R
 # 保留输入脚本
-message("  source.R")
-write_lines(fc, file.path(outdir, "source.R"))
+message("  plot.R")
+write_lines(fc, file.path(outdir, "plot.R"))
 # 生成 plot.R 进行调用
 args_pairs <- map(
   a[names(a) == "param"],
@@ -548,7 +548,7 @@ for (i in seq_along(args_pairs)) {
 args_pairs2[length(args_pairs2)] <- sub(",", "", args_pairs2[length(args_pairs2)])
 
 plot_r <- c(
-  'source("source.R")\n',
+  '# ====================== Plugin Caller ======================\n',
   paste(
     paste0(a$main$value, "("),
     paste(args_pairs2, collapse = "\n"),
@@ -575,9 +575,8 @@ if (a$return$value$outtype %in% c("ggplot", "plot", "basic", "grid")) {
   )
 }
 
-message("  plot.R")
-write_lines(plot_r, file.path(outdir, "plot.R"))
+write_lines(plot_r, file.path(outdir, "plot.R"), append = TRUE)
 
-style_file(file.path(outdir, c("source.R", "plot.R")))
+style_file(file.path(outdir, "plot.R"))
 
 # Rscript /Users/wsx/Documents/GitHub/scripts-basic/r/run_debug.R -c test-plugin/data.json -i test-plugin/data.txt -o test-plugin/test -t test-plugin --enableExample
