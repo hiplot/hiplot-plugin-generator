@@ -17,8 +17,8 @@ suppressMessages(library(purrr))
 suppressMessages(library(jsonlite))
 suppressMessages(library(styler))
 
-Args <- commandArgs(trailingOnly = TRUE)
-#Args <- c("test.R", "test-plugin2")
+#Args <- commandArgs(trailingOnly = TRUE)
+Args <- c("test.R", "test-plugin2")
 
 # 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
 # 已准备好的数据文件或其他所需脚本
@@ -282,8 +282,6 @@ if ("data" %in% names(a)) {
 # 标签、参数、控件的设定匹配和设定有难度
 
 message("Generating plugin files...")
-# TODO:
-# dataArg 暂时不处理
 # 参数的收集！参数对应的 ui 控件！
 set_widget <- function(w) {
   c(list(
@@ -495,7 +493,9 @@ write_lines(fc, file.path(outdir, "source.R"))
 args_pairs <- map(
   a[names(a) == "param"],
   ~c(.$value$param_type,
-     .$value$param_name))
+     .$value$param_name,
+     .$value$widget_type,
+     .$value$default_value$index))
 
 # 确定 data 的匹配
 # 如果开发时数据表使用 data, data2, data3 没有问题
@@ -504,16 +504,31 @@ args_pairs <- map(
 # !!后续文档要描述该情况，推荐按函数设定顺序写参数说明
 data_idx <- 1
 args_pairs2 = c()
-for (i in args_pairs) {
-  if (i[1] == "data") {
+for (i in seq_along(args_pairs)) {
+  if (args_pairs[[i]][1] == "data") {
     if (data_idx == 1) {
-      z <- paste(i[1], "= data, ")
+      z <- paste(args_pairs[[i]][1], "= data, ")
     } else {
-      z <- paste(i[1], "=", paste0("data", data_idx, ","))
+      z <- paste(args_pairs[[i]][1], "=", paste0("data", data_idx, ","))
     }
+
+    # 补充对应的 dataArg
+    idx <- map_chr(args_pairs, 1) == "dataArg" & map_chr(args_pairs, 3) == args_pairs[[i]][2]
+    if (any(idx)) {
+      z2 <- paste(map_chr(args_pairs[idx], 2), "=",
+                  paste0(
+                    "conf$dataArg[[",
+                    data_idx, "]][[",
+                    map_chr(args_pairs[idx], 4),
+                    "]]$value,"))
+      z <- c(z, z2)
+    }
+
     data_idx = data_idx + 1
-  } else if (i[1] == "extra") {
-    z <- paste(i[2], "=", paste0("conf$extra$", i[2], ","))
+  } else if (args_pairs[[i]][1] == "extra") {
+    z <- paste(args_pairs[[i]][2], "=", paste0("conf$extra$", args_pairs[[i]][2], ","))
+  } else {
+    z <- c()
   }
   args_pairs2 <- c(args_pairs2, z)
 }
