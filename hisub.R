@@ -340,11 +340,11 @@ a$params <- collect_params(a)
 json_meta <- list(
   name = list(zh_cn = a$apptitle$value$zh, en = a$apptitle$value$en),
   intro = list(zh_cn = a$description$value$zh, en = a$description$value$en),
-  #src = "",
-  href = paste0(a$target$value, "/", a$appname$value),
+  src = "",
+  href = paste0("/", a$target$value, "/", a$appname$value),
   tag = "vue",
   meta = list(
-    #score = 4,
+    score = 3, # default score, change by team member after accept
     author = a$author$value,
     email = a$maintainer$value,
     issues = a$url$value,
