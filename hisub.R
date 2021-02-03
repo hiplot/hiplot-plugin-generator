@@ -17,7 +17,8 @@ suppressMessages(library(purrr))
 suppressMessages(library(jsonlite))
 suppressMessages(library(styler))
 
-Args <- commandArgs(trailingOnly = TRUE)
+#Args <- commandArgs(trailingOnly = TRUE)
+Args <- c("test.R", "test-plugin2")
 
 # 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
 # 已准备好的数据文件或其他所需脚本
@@ -285,14 +286,29 @@ message("Generating plugin files...")
 # dataArg 暂时不处理
 # 参数的收集！参数对应的 ui 控件！
 set_widget <- function(w) {
-  type <- w$widget_type
   c(list(
-    type = type,
+    type = w$widget_type,
     label = list(
       en = w$en,
       zh_cn = w$zh
     )
   ), w$default_value[!names(w$default_value) %in% "default"])
+}
+
+set_widget_dataArg <- function(w) {
+  c(list(
+    label = list(
+      en = w$en,
+      zh_cn = w$zh
+    )
+  ), w$default_value[!names(w$default_value) %in% "default"])
+}
+
+drop_names <- function(x) {
+  for (i in seq_along(x)) {
+    names(x[[i]]) <- NULL
+  }
+  x
 }
 
 collect_params <- function(x) {
@@ -309,15 +325,27 @@ collect_params <- function(x) {
   # ui.json 需要生成的是参数的 ui 配置信息
 
   params_textarea <- list()
+  params_dataArg <- list()
   params_extra <- list()
   example_textarea <- list()
+  example_dataArg <- list()
   #example_extra <- list()
   ui_data <- list()
+  ui_dataArg <- list()
   ui_extra <- list()
 
+  # 为数据表添加前缀，对应的 dataArg 也需要更改
   j <- 1
   for (i in seq_along(all_args)) {
     if (all_args[[i]]$value$param_type == "data") {
+      for (k in seq_along(all_args)) {
+        # widget_type
+        if (all_args[[k]]$value$param_type == "dataArg") {
+          if (all_args[[k]]$value$widget_type == all_args[[i]]$value$param_name) {
+            all_args[[k]]$value$widget_type <- paste0(j, "-", all_args[[i]]$value$param_name)
+          }
+        }
+      }
       all_args[[i]]$value$param_name <- paste0(j, "-", all_args[[i]]$value$param_name)
       j <- j + 1
     }
@@ -334,20 +362,43 @@ collect_params <- function(x) {
     } else if (y$param_type == "extra") {
       params_extra[[y$param_name]] <<- y$default_value$default
       ui_extra[[y$param_name]] <<- set_widget(y)
+    } else if (y$param_type == "dataArg") {
+      params_dataArg[[y$widget_type]][[y$param_name]][["value"]] <<- list()
+      example_dataArg[[y$widget_type]][[y$param_name]][["value"]] <<- if (is.null(y$default_value$default)) {
+        list()
+      } else y$default_value$default
+      ui_dataArg[[y$widget_type]][[y$param_name]] <<- set_widget_dataArg(y)
     }
     NULL
   })
 
+  # example_dataArg 和 ui_dataArg 可能需要排序
+  for (i in names(ui_dataArg)) {
+    iord <- order(map_int(ui_dataArg[[i]], "index"))
+    ui_dataArg[[i]] <- ui_dataArg[[i]][iord]
+    for (j in seq_along(ui_dataArg[[i]])) {
+      ui_dataArg[[i]][[j]]$index <- NULL
+    }
+
+    if (i %in% names(example_dataArg)) {
+      example_dataArg[[i]] <- example_dataArg[[i]][iord]
+    }
+  }
+
   list(
     params_textarea = params_textarea,
+    params_dataArg = drop_names(params_dataArg),
     params_extra = params_extra,
     example_textarea = example_textarea,
+    example_dataArg = drop_names(example_dataArg),
     ui_data = ui_data,
+    ui_dataArg = drop_names(ui_dataArg),
     ui_extra = ui_extra
   )
 }
 
 a$params <- collect_params(a)
+#toJSON(list(list(value= list()), list(value=list())), auto_unbox = T)
 
 # meta.json
 # Metadata for the plugin
@@ -384,13 +435,8 @@ json_data <- list(
     # Multiple dataTable assigned to data, data2, data3, ... in plot.R
     textarea = a$params$params_textarea,
     config = list(
+      dataArg = a$params$params_dataArg,
       # data = list(),
-      # dataArg = list(
-      #   # Match dataTable names in textarea
-      #   # Assign default selected data columns by order
-      #   # toJSON(list(list(value = c("a", "b")), list(value = 1)), auto_unbox = T)
-      #   #datTable = list()
-      # ),
       general = list(
         cmd = "",
         imageExportType = a$return$value$outfmt,
@@ -409,12 +455,9 @@ json_data <- list(
   exampleData = list(
     config = list(
       # data = list(),
-      # dataArg = list(
-      #   #datTable = list()
-      # ),
       # general = list(),
       # extra = list()
-     "reserved_" = TRUE # 无用处，保留 config 结构
+     dataArg = a$params$example_dataArg
     ),
     textarea = a$params$example_textarea
   )
@@ -422,15 +465,14 @@ json_data <- list(
 
 message("  data.json")
 #jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
-write_json(json_data, file.path(outdir, "data.json"), auto_unbox = TRUE, pretty = TRUE)
+write_json(json_data, file.path(outdir, "data.json"),
+           null = "list", auto_unbox = TRUE, pretty = TRUE)
 
 # ui.json
 
 json_ui <- list(
   data = a$params$ui_data,
-  # dataArg = list(
-  #   datTable = list()
-  # ),
+  dataArg = a$params$ui_dataArg,
   # general = list(
   #
   # ),
@@ -439,7 +481,8 @@ json_ui <- list(
 
 message("  ui.json")
 #json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
-write_json(json_ui, file.path(outdir, "ui.json"), auto_unbox = TRUE, pretty = TRUE)
+write_json(json_ui, file.path(outdir, "ui.json"),
+           null = "list", auto_unbox = TRUE, pretty = TRUE)
 
 # plot.R
 # 保留输入脚本

@@ -37,6 +37,7 @@
 #   Valid <param-type> includes data, dataArg, general, extra
 #     - data (also data2, data3, ...) is the Excel-like data table for user input.
 #     - dataArg is used for setting the default selected column names.
+#          export::dataArg::data::{"index":1,"blackItems":["time","status"]}
 #     - extra is for custom setting.
 #   Valid <default-value> depends one the <widget-type>, use json-like format:
 #     - for type 'hiplot-textarea' (typically used for param-type 'data'): true or false
@@ -69,7 +70,7 @@
 #         使用它们时，主函数需要支持一个结果文件/目录路径设定，使用 hiplot_file/hiplot_outdir
 #   When <result-type> is other, <output-setting> set the parameter corresponding to
 #        output path; otherwise, <output-setting> set default figure size and theme.
-#        还有颜色、字体
+#        还有标题、颜色、字体
 #        e.g., {"width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
 # en: Result description in English.
 # zh: 结果的中文描述

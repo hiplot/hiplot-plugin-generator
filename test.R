@@ -27,12 +27,11 @@
 # @param data export::data::hiplot-textarea::{"default": "data.txt", "required": true}
 # en: a table with at least two numeric columns, one column name should be 'mpg'.
 # zh: 至少两列的数值的表格，至少有一列名为 mpg。
-#
-# @param x export::extra::text-field::{"default":"wt", "class":"col-12"}
+# @param x export::dataArg::data::{"index":2, "default": ["sex", "ecog"], "blackItems":["aaa","bbb"], "required": true}
 # en: a string represent the column mapping to x axis.
 # zh: 一个指示映射到 x 轴的列名。
-# @param y export::extra::select::{"default": ["mpg"], "items": ["mpg", "wt", "vs"], "class":"col-12"}
-# en: a string represent the column mapping to x axis.
+# @param y export::dataArg::data::{"index":1, "blackItems":["time","status"], "required": false}
+# en: a string represent the column mapping to y axis.
 # zh: 一个指示映射到 y 轴的列名。
 # @param size export::extra::slider::{"default":2, "min":0.5, "max":5, "step":0.5, "class":"col-12"}
 # en: a number specifying dot size.
@@ -53,6 +52,10 @@
 # data("mtcars")
 # write_tsv(mtcars, "data.txt")
 # @hiplot end
+
+# param x export::extra::text-field::{"default":"wt", "class":"col-12"}
+# param y export::extra::select::{"default": ["mpg"], "default": "age", "items": ["mpg", "wt", "vs"], "class":"col-12"}
+
 
 library(ggplot2)
 helloworld <- function(data, x, y = "mpg", size = 2, add_line = TRUE) {
