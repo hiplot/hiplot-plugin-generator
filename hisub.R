@@ -9,7 +9,7 @@
 # 5. 生成 .json (data.json, meta.json, ui.json)
 # 6. 基于配置和输入文件生成 plot.R
 #
-# Test: ./hisub.R test.R test-plugin
+# Test: ./hisub.R test_ezcox.R ezcox
 
 suppressMessages(library(readr))
 suppressMessages(library(dplyr))
@@ -17,23 +17,23 @@ suppressMessages(library(purrr))
 suppressMessages(library(jsonlite))
 suppressMessages(library(styler))
 
-#Args <- commandArgs(trailingOnly = TRUE)
-Args <- c("test.R", "test-plugin2")
+Args <- commandArgs(trailingOnly = TRUE)
+# Args <- c("test.R", "test-plugin2")
 
 # 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
 # 已准备好的数据文件或其他所需脚本
 fc <- file_content <- read_lines(Args[1])
 if (length(Args) > 2) {
   outdir <- Args[length(Args)]
-  flag = TRUE
+  flag <- TRUE
 } else {
   outdir <- Args[2]
-  flag = FALSE
+  flag <- FALSE
 }
 
 dir.create(outdir, recursive = TRUE)
 if (flag) {
-  file.copy(Args[2:(length(Args)-1)], outdir)
+  file.copy(Args[2:(length(Args) - 1)], outdir)
 }
 # Preprocessing -----------------------------------------------------------
 
@@ -60,11 +60,13 @@ parse_tag_appname <- function(x) {
   list(type = "appname", value = parse_tag_value(x))
 }
 parse_tag_apptitle <- function(x) {
-  list(type = "apptitle",
-       value = list(
-         en = trimws(sub("^# *", "", x[2])),
-         zh = trimws(sub("^# *", "", x[3]))
-       ))
+  list(
+    type = "apptitle",
+    value = list(
+      en = trimws(sub("^# *", "", x[2])),
+      zh = trimws(sub("^# *", "", x[3]))
+    )
+  )
 }
 parse_tag_target <- function(x) {
   list(type = "target", value = parse_tag_value(x))
@@ -265,7 +267,7 @@ names(a) <- tag_name
 a <- compact(a)
 
 # 注意有多个参数在 names 中同名
-#print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
+# print(jsonlite::toJSON(a, auto_unbox = TRUE, pretty = TRUE))
 
 
 # Generate data files -----------------------------------------------------
@@ -327,7 +329,7 @@ collect_params <- function(x) {
   params_extra <- list()
   example_textarea <- list()
   example_dataArg <- list()
-  #example_extra <- list()
+  # example_extra <- list()
   ui_data <- list()
   ui_dataArg <- list()
   ui_extra <- list()
@@ -364,7 +366,9 @@ collect_params <- function(x) {
       params_dataArg[[y$widget_type]][[y$param_name]][["value"]] <<- list()
       example_dataArg[[y$widget_type]][[y$param_name]][["value"]] <<- if (is.null(y$default_value$default)) {
         list()
-      } else y$default_value$default
+      } else {
+        y$default_value$default
+      }
       ui_dataArg[[y$widget_type]][[y$param_name]] <<- set_widget_dataArg(y)
     }
     NULL
@@ -396,7 +400,7 @@ collect_params <- function(x) {
 }
 
 a$params <- collect_params(a)
-#toJSON(list(list(value= list()), list(value=list())), auto_unbox = T)
+# toJSON(list(list(value= list()), list(value=list())), auto_unbox = T)
 
 # meta.json
 # Metadata for the plugin
@@ -422,7 +426,7 @@ json_meta <- list(
 )
 
 message("  meta.json")
-#jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
+# jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_meta, file.path(outdir, "meta.json"), auto_unbox = TRUE, pretty = TRUE)
 
 # data.json
@@ -443,9 +447,15 @@ json_data <- list(
             width = a$return$value$outsetting$width,
             height = a$return$value$outsetting$height
           ),
-          theme = if (a$return$value$outsetting$theme_support) {
-            a$return$value$outsetting$theme_default
-          } else NULL
+          theme = if (!is.null(a$return$value$outsetting$theme_support)) {
+            if (a$return$value$outsetting$theme_support) {
+              a$return$value$outsetting$theme_default
+            } else {
+              NULL
+            }
+          } else {
+            NULL
+          }
         ),
         a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height", "theme_support", "theme_default")]
       ),
@@ -458,16 +468,17 @@ json_data <- list(
       # data = list(),
       # general = list(),
       # extra = list()
-     dataArg = a$params$example_dataArg
+      dataArg = a$params$example_dataArg
     ),
     textarea = a$params$example_textarea
   )
 )
 
 message("  data.json")
-#jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
+# jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_data, file.path(outdir, "data.json"),
-           null = "list", auto_unbox = TRUE, pretty = TRUE)
+  null = "list", auto_unbox = TRUE, pretty = TRUE
+)
 
 # ui.json
 
@@ -481,9 +492,10 @@ json_ui <- list(
 )
 
 message("  ui.json")
-#json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
+# json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_ui, file.path(outdir, "ui.json"),
-           null = "list", auto_unbox = TRUE, pretty = TRUE)
+  null = "list", auto_unbox = TRUE, pretty = TRUE
+)
 
 # plot.R
 # 保留输入脚本
@@ -492,10 +504,13 @@ write_lines(fc, file.path(outdir, "source.R"))
 # 生成 plot.R 进行调用
 args_pairs <- map(
   a[names(a) == "param"],
-  ~c(.$value$param_type,
-     .$value$param_name,
-     .$value$widget_type,
-     .$value$default_value$index))
+  ~ c(
+    .$value$param_type,
+    .$value$param_name,
+    .$value$widget_type,
+    .$value$default_value$index
+  )
+)
 
 # 确定 data 的匹配
 # 如果开发时数据表使用 data, data2, data3 没有问题
@@ -503,7 +518,7 @@ args_pairs <- map(
 # 按顺序生成给 data, data2, ...
 # !!后续文档要描述该情况，推荐按函数设定顺序写参数说明
 data_idx <- 1
-args_pairs2 = c()
+args_pairs2 <- c()
 for (i in seq_along(args_pairs)) {
   if (args_pairs[[i]][1] == "data") {
     if (data_idx == 1) {
@@ -515,16 +530,19 @@ for (i in seq_along(args_pairs)) {
     # 补充对应的 dataArg
     idx <- map_chr(args_pairs, 1) == "dataArg" & map_chr(args_pairs, 3) == args_pairs[[i]][2]
     if (any(idx)) {
-      z2 <- paste(map_chr(args_pairs[idx], 2), "=",
-                  paste0(
-                    "conf$dataArg[[",
-                    data_idx, "]][[",
-                    map_chr(args_pairs[idx], 4),
-                    "]]$value,"))
+      z2 <- paste(
+        map_chr(args_pairs[idx], 2), "=",
+        paste0(
+          "conf$dataArg[[",
+          data_idx, "]][[",
+          map_chr(args_pairs[idx], 4),
+          "]]$value,"
+        )
+      )
       z <- c(z, z2)
     }
 
-    data_idx = data_idx + 1
+    data_idx <- data_idx + 1
   } else if (args_pairs[[i]][1] == "extra") {
     z <- paste(args_pairs[[i]][2], "=", paste0("conf$extra$", args_pairs[[i]][2], ","))
   } else {
@@ -539,7 +557,8 @@ plot_r <- c(
   paste(
     paste0(a$main$value, "("),
     paste(args_pairs2, collapse = "\n"),
-    ")", sep = "\n"
+    ")",
+    sep = "\n"
   )
 )
 
@@ -557,7 +576,8 @@ if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
 if (a$return$value$outtype %in% c("ggplot", "plot", "basic", "grid")) {
   plot_r <- c(
     plot_r,
-    '\nexport_single(p, opt, conf)')
+    "\nexport_single(p, opt, conf)"
+  )
 }
 
 message("  plot.R")
