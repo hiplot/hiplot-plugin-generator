@@ -6,14 +6,15 @@
 # a test plugin
 # 一个测试插件
 # @target basic
-# @status new
+# @tag test dotplot
 # @author a, b, c
-# @maintainer <a@163.com>
+# @email a@163.com
 # @url xxx.com
 # @citation
 # - reference #1.
 # - reference #2.
 # @version 0.1.0
+# @release 2020-09-10
 # @description
 # en: A detail description for this plugin,
 # markdown should be supported.

@@ -68,14 +68,19 @@ parse_tag_apptitle <- function(x) {
 parse_tag_target <- function(x) {
   list(type = "target", value = parse_tag_value(x))
 }
-parse_tag_status <- function(x) {
-  list(type = "status", value = parse_tag_value(x))
+
+parse_tag_release <- function(x) {
+  list(type = "release", value = parse_tag_value(x))
+}
+
+parse_tag_tag <- function(x) {
+  list(type = "tag", value = unlist(strsplit(parse_tag_header(x), split = " ")))
 }
 parse_tag_author <- function(x) {
   list(type = "author", value = parse_tag_header(x))
 }
-parse_tag_maintainer <- function(x) {
-  list(type = "author", value = parse_tag_header(x))
+parse_tag_email <- function(x) {
+  list(type = "email", value = parse_tag_header(x))
 }
 parse_tag_url <- function(x) {
   value <- parse_tag_header(x)
@@ -238,12 +243,13 @@ parse_tag <- function(x, name) {
     appname = parse_tag_appname(x),
     apptitle = parse_tag_apptitle(x),
     target = parse_tag_target(x),
-    status = parse_tag_status(x),
+    tag = parse_tag_tag(x),
     author = parse_tag_author(x),
-    maintainer = parse_tag_maintainer(x),
+    email = parse_tag_email(x),
     url = parse_tag_url(x),
     citation = parse_tag_citation(x),
     version = parse_tag_version(x),
+    release = parse_tag_release(x),
     description = parse_tag_description(x),
     main = parse_tag_main(x),
     library = parse_tag_library(x),
@@ -350,13 +356,17 @@ json_meta <- list(
   intro = list(zh_cn = a$description$value$zh, en = a$description$value$en),
   src = "",
   href = paste0("/", a$target$value, "/", a$appname$value),
-  tag = "vue",
+  tag = c("vue", a$tag$value),
   meta = list(
     score = 3, # default score, change by team member after accept
     author = a$author$value,
-    email = a$maintainer$value,
+    email = a$email$value,
     issues = a$url$value,
-    releaseDate = as.character(Sys.Date()),
+    releaseDate = if ("release" %in% names(a)) {
+      a$release$value
+    } else {
+      as.character(Sys.Date())
+    },
     updateDate = as.character(Sys.Date()),
     citation = a$citation$value
   )
@@ -430,26 +440,6 @@ json_ui <- list(
 message("  ui.json")
 #json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_ui, file.path(outdir, "ui.json"), auto_unbox = TRUE, pretty = TRUE)
-
-# "datTable": {
-#   "type": "hiplot-textarea",
-#   "required": true,
-#   "label": "messages.extra.dataTable"
-# }
-
-# {
-#   "label": "messages.basic.common.controls",
-#   "blackItems": [
-#     "time",
-#     "status"
-#   ],
-#   "norequire": true
-# }
-
-# "drop_controls": {
-#   "type": "switch",
-#   "label": "messages.basic.common.drop_controls"
-# }
 
 # plot.R
 # 保留输入脚本
