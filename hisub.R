@@ -582,6 +582,7 @@ if (a$return$value$outtype %in% c("ggplot", "plot", "basic", "grid")) {
 
 message("  plot.R")
 write_lines(plot_r, file.path(outdir, "plot.R"))
-style_file(file.path(outdir, "plot.R"))
+
+style_file(file.path(outdir, c("source.R", "plot.R")))
 
 # Rscript /Users/wsx/Documents/GitHub/scripts-basic/r/run_debug.R -c test-plugin/data.json -i test-plugin/data.txt -o test-plugin/test -t test-plugin --enableExample
