@@ -446,18 +446,9 @@ json_data <- list(
           size = list(
             width = a$return$value$outsetting$width,
             height = a$return$value$outsetting$height
-          ),
-          theme = if (!is.null(a$return$value$outsetting$theme_support)) {
-            if (a$return$value$outsetting$theme_support) {
-              a$return$value$outsetting$theme_default
-            } else {
-              NULL
-            }
-          } else {
-            NULL
-          }
+          )
         ),
-        a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height", "theme_support", "theme_default")]
+        a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height", "theme_default")]
       ),
       # Common extra parameter setting
       extra = a$params$params_extra
@@ -473,6 +464,10 @@ json_data <- list(
     textarea = a$params$example_textarea
   )
 )
+
+if (!is.null(a$return$value$outsetting$theme_default)) {
+  json_data$params$config$general$theme <- a$return$value$outsetting$theme_default
+}
 
 message("  data.json")
 # jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
