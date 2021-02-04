@@ -107,7 +107,7 @@ With the R script, we can generate the Hiplot plugin with command:
 
 - The 1st argument should be the prepared R script file.
 - The last argument should be a directory path for the plugin, typically it has the same name as your plugin name.
-- Other middle arguments will be treated as necessary files and copied to the destionation directory (specified by the last argument).
+- Other middle arguments will be treated as necessary files (like `README.md`, currently it cannot be scripts called by the 1st R script ) and copied to the destination directory (specified by the last argument).
 
 Then you can submit the generated `data.json` and `ui.json` to https://hiplot.com.cn/developer/plugin-preview to see how it works. For our "Hello World", it looks like:
 
