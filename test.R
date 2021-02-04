@@ -8,7 +8,6 @@
 # @target basic
 # @tag test dotplot
 # @author a, b, c
-# @email a@163.com
 # @url xxx.com
 # @citation
 # - reference #1.

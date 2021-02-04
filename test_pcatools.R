@@ -6,56 +6,68 @@
 pacman::p_load(PCAtools)
 
 # @hiplot start
-# @appname test-plugin
+# @appname pcatools
 # @apptitle
-# a test plugin
-# 一个测试插件
+# PCAtools
+# 主成分分析 (PCAtools)
 # @target basic
-# @tag test dotplot
-# @author a, b, c
-# @email a@163.com
-# @url xxx.com
-# @citation
-# - reference #1.
-# - reference #2.
+# @tag correlation dimension
+# @author Hiplot Team | Jianfeng Li
+# @email admin@hiplot.org
+# @url https://github.com/kevinblighe/PCAtools
 # @version 0.1.0
-# @release 2020-09-10
+# @release 2021-01-31
 # @description
-# en: A detail description for this plugin,
-# markdown should be supported.
-# zh: 插件中文描述。
-# 这个插件用于测试。
+# en: Dimension reduction methods
+# zh: 常规降维
 #
-# @main helloworld
-# @library ggplot2 tidyverse/dplyr https://gitee.com/ShixiangWang/ezcox
+# @main call_pcatools
+# @library PCAtools
 #
-# @param data export::data::hiplot-textarea::{"default": "data.txt", "required": true}
-# en: a table with at least two numeric columns, one column name should be 'mpg'.
-# zh: 至少两列的数值的表格，至少有一列名为 mpg。
-# @param x export::dataArg::data::{"index":2, "default": ["sex", "ecog"], "blackItems":["aaa","bbb"], "required": true}
-# en: a string represent the column mapping to x axis.
-# zh: 一个指示映射到 x 轴的列名。
-# @param y export::dataArg::data::{"index":1, "blackItems":["time","status"], "required": false}
-# en: a string represent the column mapping to y axis.
-# zh: 一个指示映射到 y 轴的列名。
-# @param size export::extra::slider::{"default":2, "min":0.5, "max":5, "step":0.5, "class":"col-12"}
-# en: a number specifying dot size.
-# zh: 一个指定点大小的数值。
-# @param add_line export::extra::switch::{"default": true, "class":"col-12"}
-# en: a bool to add line.
-# zh: 添加线图。
-# @param zzz 没有采用方括号标记的参数不被解析导出，可以仅用于注释。
+# @param datTable export::data::hiplot-textarea::{"default": {"value":"public/demo/pcatools/data.txt", "link":""}, "required": true}
+# en: Data Table
+# zh: 数据表
+# @param sampleInfo export::data::hiplot-textarea::{"default": {"value":"public/demo/pcatools/data2.txt", "link":""}, "required": true}
+# en: Sample Info
+# zh: 样本信息
+# @param screeplotComponents export::extra::slider::{"default":30, "min":1, "max":999, "step":1, "class":"col-12 col-md-6"}
+# en: Screeplot Components
+# zh: 崖低碎石图主成分数目
+# @param pairsplotComponents export::extra::slider::{"default":3, "min":1, "max":999, "step":1, "class":"col-12 col-md-6"}
+# en: Pairsplot Components
+# zh: 散点矩阵图主成分数目
+# @param plotloadingsComponents export::extra::slider::{"default":5, "min":1, "max":999, "step":1, "class":"col-12 col-md-6"}
+# en: Plotloadings Components
+# zh: 载荷图主成分数目
+# @param eigencorplotComponents export::extra::slider::{"default":10, "min":1, "max":999, "step":1, "class":"col-12 col-md-6"}
+# en: Eigencorplot Components
+# zh: 关联热图主成分数目
+# @param top_var export::extra::slider::{"default":90, "min":1, "max":100, "step":1, "class":"col-12"}
+# en: Top Variance
+# zh: Top 方差
+# @param biplotColBy export::dataArg::sampleInfo::{"default": "", "index":1, "individual": true, "class":"col-12 col-md-6"}
+# en: Biplot Color By
+# zh: 双标图颜色列
+# @param biplotShapeBy export::dataArg::sampleInfo::{"default": "", "index":2, "individual": true, "class":"col-12 col-md-6"}
+# en: Biplot Shape By
+# zh: 双标图形状列
+# @param eigencorplotMetavars export::dataArg::sampleInfo::{"default": "", "index":3, "individual": true, "class":"col-12", "multiple":true}
+# en: Eigencorplot Phenotype
+# zh: 关联热图表型列
+# @param screeplotColBar export::extra::color-picker::{"default": "#0085FF", "class": "col-12 col-md-3"}
+# en: Screeplot Bar
+# zh: 崖低碎石图颜色
+# @param plotloadingsLowCol export::extra::color-picker::{"default": "#0085FF", "class": "col-12 col-md-3"}
+# en: Loadings Low
+# zh: 载荷图低颜色
+# @param plotloadingsMidCol export::extra::color-picker::{"default": "#FFFFFF", "class": "col-12 col-md-3"}
+# en: Loadings Mid
+# zh: 载荷图中颜色
+# @param plotloadingsHighCol export::extra::color-picker::{"default": "#FF0000", "class": "col-12 col-md-3"}
+# en: Loadings High
+# zh: 载荷图高颜色
 #
-# @return plot::["pdf", "png", "tiff"]::{"title": "A test plot", "width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
-# en: Generate a dot plot.
-# zh: 生成一幅点图。
-# @data
-# # 此处可以编写生成示例数据的代码
-# # 示例数据文件需要跟数据表格参数对应起来
-# # 或者忽略该标签，手动提交示例数据
-# library(readr)
-# data("mtcars")
-# write_tsv(mtcars, "data.txt")
+# @return ggplot::["pdf", "png"]::{"title": "", "width": 19, "height": 14, "palette": "lancet"}
 # @hiplot end
 call_pcatools <- function(datTable, sampleInfo,
                           top_var,

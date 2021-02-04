@@ -10,6 +10,7 @@
 # 6. 基于配置和输入文件生成 plot.R
 #
 # Test: ./hisub.R test_ezcox.R ezcox
+# Test: ./hisub.R test_pcatools.R pcatools
 
 suppressMessages(library(readr))
 suppressMessages(library(dplyr))
@@ -436,15 +437,15 @@ json_meta <- list(
   meta = list(
     score = 3, # default score, change by team member after accept
     author = a$author$value,
-    email = a$email$value,
-    issues = a$url$value,
+    email = if (!is.null(a$email$value)) a$email$value else "",
+    issues = if (!is.null(a$url$value)) a$url$value else "",
     releaseDate = if ("release" %in% names(a)) {
       a$release$value
     } else {
       as.character(Sys.Date())
     },
     updateDate = as.character(Sys.Date()),
-    citation = a$citation$value
+    citation = if (!is.null(a$citation$value)) a$citation$value else ""
   )
 )
 
@@ -550,9 +551,9 @@ args_pairs2 <- c()
 for (i in seq_along(args_pairs)) {
   if (args_pairs[[i]][1] == "data") {
     if (data_idx == 1) {
-      z <- paste(args_pairs[[i]][1], "= data, ")
+      z <- paste(args_pairs[[i]][2], "= data, ")
     } else {
-      z <- paste(args_pairs[[i]][1], "=", paste0("data", data_idx, ","))
+      z <- paste(args_pairs[[i]][2], "=", paste0("data", data_idx, ","))
     }
 
     # 补充对应的 dataArg
@@ -581,7 +582,7 @@ for (i in seq_along(args_pairs)) {
 args_pairs2[length(args_pairs2)] <- sub(",", "", args_pairs2[length(args_pairs2)])
 
 plot_r <- c(
-  '# ====================== Plugin Caller ======================\n',
+  "# ====================== Plugin Caller ======================\n",
   paste(
     paste0(a$main$value, "("),
     paste(args_pairs2, collapse = "\n"),
