@@ -582,7 +582,7 @@ for (i in seq_along(args_pairs)) {
 args_pairs2[length(args_pairs2)] <- sub(",", "", args_pairs2[length(args_pairs2)])
 
 plot_r <- c(
-  "# ====================== Plugin Caller ======================\n",
+  "\n# ====================== Plugin Caller ======================\n",
   paste(
     paste0(a$main$value, "("),
     paste(args_pairs2, collapse = "\n"),
@@ -615,7 +615,7 @@ if (a$return$value$outtype %in% c("ggplot", "plot")) {
 } else if (a$return$value$outtype == "directory") {
   plot_r <- c(
     plot_r,
-    "\nexport_directory(p, opt, conf)"
+    "\nexport_directory()"
   )
 }
 
