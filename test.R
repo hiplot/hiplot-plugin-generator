@@ -24,7 +24,7 @@
 # @main helloworld
 # @library ggplot2 tidyverse/dplyr https://gitee.com/ShixiangWang/ezcox
 #
-# @param data export::data::hiplot-textarea::{"default": "data.txt", "required": true}
+# @param data export::data::hiplot-textarea::{"default": {"example":"data.txt", "value":"public/demo/pcatools/data.txt"}, "required": true}
 # en: a table with at least two numeric columns, one column name should be 'mpg'.
 # zh: 至少两列的数值的表格，至少有一列名为 mpg。
 # @param x export::dataArg::data::{"index":2, "default": ["sex", "ecog"], "blackItems":["aaa","bbb"], "required": true}
@@ -41,7 +41,7 @@
 # zh: 添加线图。
 # @param zzz 没有采用方括号标记的参数不被解析导出，可以仅用于注释。
 #
-# @return plot::["pdf", "png", "tiff"]::{"title": "A test plot", "width": 6, "height": 4, "theme_support": true, "theme_default": "theme_bw"}
+# @return plot::["pdf", "png", "tiff"]::{"title": "A test plot", "height": 4, "theme": "theme_bw"}
 # en: Generate a dot plot.
 # zh: 生成一幅点图。
 # @data

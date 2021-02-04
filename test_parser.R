@@ -32,7 +32,8 @@
 # @param data [export::<param-type>::<widget-type>::[<default-value>]]
 # Pay attention:
 #   参数名后接参数接口设定，下一行才开始描述参数。
-#   Valid <widget-type> includes hiplot-textarea, select, switch, slider, text-field
+#   data widgets: hiplot-textarea, cloud-file, combobox, codemirror
+#   extra widgets: slider, switch, select, autocomplete, color-picker, text-field
 #   (例子：https://hiplot.com.cn/basic/ezcox)
 #   Valid <param-type> includes data, dataArg, general, extra
 #     - data (also data2, data3, ...) is the Excel-like data table for user input.

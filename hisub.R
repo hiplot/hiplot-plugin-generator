@@ -323,13 +323,18 @@ collect_params <- function(x) {
   # 一处在 params 里，一处在 exampleData 里
   #
   # ui.json 需要生成的是参数的 ui 配置信息
+  # 注释中 default 传入到 data.json，其他参数传入到 ui.json
 
   params_textarea <- list()
+  params_data <- list()
   params_dataArg <- list()
   params_extra <- list()
+
   example_textarea <- list()
+  example_data <- list()
   example_dataArg <- list()
   # example_extra <- list()
+
   ui_data <- list()
   ui_dataArg <- list()
   ui_extra <- list()
@@ -354,10 +359,26 @@ collect_params <- function(x) {
   map(all_args, function(y) {
     y <- y$value
     if (y$param_type == "data") {
-      params_textarea[[y$param_name]] <<- ""
-      if (!is.null(y$default_value$default)) {
-        example_textarea[[y$param_name]] <<- paste(read_lines(file.path(outdir, y$default_value$default)), collapse = "\n")
+      # 如果不是表格数据，就不需要 hiplot-textarea
+      if (y$widget_type == "hiplot-textarea") {
+        params_textarea[[y$param_name]] <<- ""
+        if (!is.null(y$default_value$default)) {
+          if (is.list(y$default_value$default)) {
+            # 如果用户传入的是 default 字典，提取其 example 项
+            fpath <- y$default_value$default$example
+          } else {
+            fpath <- y$default_value$default
+          }
+          if (length(fpath) > 0) {
+            example_textarea[[y$param_name]] <<- paste(read_lines(file.path(outdir, fpath)), collapse = "\n")
+          }
+        }
+        params_data[[y$param_name]] <<- y$default_value$default[!names(y$default_value$default) %in% "example"]
+      } else {
+        params_data[[y$param_name]] <<- y$default_value$default
       }
+
+      example_data[[y$param_name]] <<- params_data[[y$param_name]]
       ui_data[[y$param_name]] <<- set_widget(y)
     } else if (y$param_type == "extra") {
       params_extra[[y$param_name]] <<- y$default_value$default
@@ -389,9 +410,11 @@ collect_params <- function(x) {
 
   list(
     params_textarea = params_textarea,
+    params_data = params_data,
     params_dataArg = drop_names(params_dataArg),
     params_extra = params_extra,
     example_textarea = example_textarea,
+    example_data = example_data,
     example_dataArg = drop_names(example_dataArg),
     ui_data = ui_data,
     ui_dataArg = drop_names(ui_dataArg),
@@ -434,21 +457,18 @@ json_data <- list(
   module = a$target$value,
   tool = a$appname$value,
   params = list(
-    # Multiple dataTable assigned to data, data2, data3, ... in plot.R
-    textarea = a$params$params_textarea,
     config = list(
       dataArg = a$params$params_dataArg,
-      # data = list(),
       general = c(
         list(
           cmd = "",
-          imageExportType = a$return$value$outfmt,
+          imageExportType = a$return$value$outfmt[a$return$value$outfmt %in% c("pdf", "png", "tiff", "plotly", "pptx")],
           size = list(
-            width = a$return$value$outsetting$width,
-            height = a$return$value$outsetting$height
+            width = if (length(a$return$value$outsetting$width) == 1) a$return$value$outsetting$width else 6,
+            height = if (length(a$return$value$outsetting$height) == 1) a$return$value$outsetting$height else 4
           )
         ),
-        a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height", "theme_default")]
+        a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height")]
       ),
       # Common extra parameter setting
       extra = a$params$params_extra
@@ -456,18 +476,31 @@ json_data <- list(
   ),
   exampleData = list(
     config = list(
-      # data = list(),
       # general = list(),
       # extra = list()
       dataArg = a$params$example_dataArg
-    ),
-    textarea = a$params$example_textarea
+    )
   )
 )
 
-if (!is.null(a$return$value$outsetting$theme_default)) {
-  json_data$params$config$general$theme <- a$return$value$outsetting$theme_default
+shifter <- function(x, n = -1) {
+  if (n == 0) x else c(tail(x, -n), head(x, n))
 }
+
+if (length(a$params$params_data) > 0) {
+  json_data$params$data <- a$params$params_data
+  json_data$params <- shifter(json_data$params)
+}
+if (length(a$params$params_textarea) > 0) {
+  json_data$params$textarea <- a$params$params_textarea
+  json_data$params <- shifter(json_data$params)
+}
+
+if (length(a$params$example_data) > 0) {
+  json_data$exampleData$data <- a$params$example_data
+  json_data$exampleData <- shifter(json_data$exampleData)
+}
+if (length(a$params$example_textarea) > 0) json_data$exampleData$textarea <- a$params$example_textarea
 
 message("  data.json")
 # jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
