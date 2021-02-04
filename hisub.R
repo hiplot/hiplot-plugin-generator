@@ -9,15 +9,19 @@
 # 5. 生成 .json (data.json, meta.json, ui.json)
 # 6. 基于配置和输入文件生成 plot.R
 #
-# Test: ./hisub.R test_ezcox.R ezcox
-# Test: ./hisub.R test_pcatools.R pcatools
+# ./hisub.R examples/helloworld.R test_hello
+VERSION = 0.1
 
-suppressMessages(library(readr))
-suppressMessages(library(dplyr))
-suppressMessages(library(purrr))
-suppressMessages(library(jsonlite))
-suppressMessages(library(styler))
+message("HiSub version ", VERSION)
+message("Copyright (c) 2021 Hiplot (https://hiplot.com.cn/)")
+message("========================")
 
+message("Checking dependencies...")
+if (!require("pacman")) install.packages("pacman")
+suppressMessages(pacman::p_load(readr, dplyr, purrr, jsonlite, styler))
+message("Done")
+
+message("Checking input...")
 Args <- commandArgs(trailingOnly = TRUE)
 # Args <- c("test.R", "test-plugin2")
 
@@ -34,10 +38,14 @@ if (length(Args) > 2) {
 
 if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
 if (flag) {
+  message("Copying middle files...")
   file.copy(Args[2:(length(Args) - 1)], outdir)
 }
+message("Done")
+
 # Preprocessing -----------------------------------------------------------
 
+message("Preprocessing R script ", Args[1])
 # 过滤无关行
 file_content <- file_content[startsWith(file_content, "#")]
 file_content <- file_content[
@@ -50,7 +58,11 @@ splitAt <- function(x, pos) unname(split(x, cumsum(seq_along(x) %in% pos)))
 
 tag_list <- splitAt(file_content, grep("# *@", file_content))
 
+message("Done")
+
 # Parsing content ---------------------------------------------------------
+
+message("Parsing Hiplot tags...")
 
 # 针对每一个元素解析标签和内容
 tag_name <- map_chr(tag_list, ~ sub("# *@([^ ]+).*", "\\1", .[1]))
@@ -105,8 +117,6 @@ parse_tag_citation <- function(x) {
     x[-1] <- sub("^# *", "", x[-1])
   }
   x <- paste(x[x != ""], collapse = "\n")
-  message("\nCitation info parsed.")
-  cat(x)
   list(type = "citation", value = x)
 }
 
@@ -155,11 +165,6 @@ parse_tag_description <- function(x) {
   x_en <- doc_list$en
   x_zh <- doc_list$zh
 
-  message("\nDescription info parsed.")
-  message("en:")
-  cat(x_en)
-  message("\nzh:")
-  cat(x_zh)
   list(type = "description", value = list(
     en = x_en,
     zh = x_zh
@@ -176,15 +181,13 @@ parse_tag_library <- function(x) {
   }
   x <- paste(x, collapse = " ")
   x <- unlist(strsplit(x, split = " "))
-  message("\nRequired packages parsed.")
-  cat(x)
+
   list(type = "library", value = x)
 }
 
 parse_tag_param <- function(x) {
   param_name <- parse_tag_value(x[1])
   if (!grepl("export::", x[1])) {
-    message("\nNo export detected.")
     return(NULL) # No returns
   }
 
@@ -236,8 +239,6 @@ parse_tag_data <- function(x) {
   x <- sub("^# *", "", x)
   x <- x[!grepl("^@|#", x)]
   x <- paste(x, collapse = "\n")
-  message("\nCode to generate data parsed.")
-  cat(x)
   list(type = "data", value = x)
 }
 
@@ -274,11 +275,12 @@ a <- compact(a)
 # Generate data files -----------------------------------------------------
 
 if ("data" %in% names(a)) {
-  message("Generating data file...")
+  message("Generating example data file...")
   old_wd <- getwd()
   setwd(outdir)
   eval(parse(text = a$data$value))
   setwd(old_wd)
+  message("Done")
 }
 
 # Generate plugin files ---------------------------------------------------
@@ -454,7 +456,7 @@ json_meta <- list(
   )
 )
 
-message("  meta.json")
+message("  - meta.json")
 # jsonlite::toJSON(json_meta, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_meta, file.path(outdir, "meta.json"), auto_unbox = TRUE, pretty = TRUE)
 
@@ -508,7 +510,7 @@ if (length(unlist(a$params$example_data)) > 0) {
 }
 if (length(a$params$example_textarea) > 0) json_data$exampleData$textarea <- a$params$example_textarea
 
-message("  data.json")
+message("  - data.json")
 # jsonlite::toJSON(json_data, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_data, file.path(outdir, "data.json"),
   null = "list", auto_unbox = TRUE, pretty = TRUE
@@ -525,7 +527,7 @@ json_ui <- list(
   extra = a$params$ui_extra
 )
 
-message("  ui.json")
+message("  - ui.json")
 # json_ui <- jsonlite::toJSON(json_ui, auto_unbox = TRUE, pretty = TRUE)
 write_json(json_ui, file.path(outdir, "ui.json"),
   null = "list", auto_unbox = TRUE, pretty = TRUE
@@ -533,7 +535,7 @@ write_json(json_ui, file.path(outdir, "ui.json"),
 
 # plot.R
 # 保留输入脚本
-message("  plot.R")
+message("  - plot.R")
 write_lines(fc, file.path(outdir, "plot.R"))
 # 生成 plot.R 进行调用
 args_pairs <- map(
@@ -630,4 +632,4 @@ write_lines(plot_r, file.path(outdir, "plot.R"), append = TRUE)
 
 style_file(file.path(outdir, "plot.R"))
 
-# output file
+message("ALL operations done")
