@@ -45,13 +45,13 @@ pacman::p_load(PCAtools)
 # @param top_var export::extra::slider::{"default":90, "min":1, "max":100, "step":1, "class":"col-12"}
 # en: Top Variance
 # zh: Top 方差
-# @param biplotColBy export::dataArg::sampleInfo::{"default": "", "index":1, "individual": true, "class":"col-12 col-md-6"}
+# @param biplotColBy export::dataArg::sampleInfo::{"default": "ER", "index":1, "individual": true, "class":"col-12 col-md-6"}
 # en: Biplot Color By
 # zh: 双标图颜色列
-# @param biplotShapeBy export::dataArg::sampleInfo::{"default": "", "index":2, "individual": true, "class":"col-12 col-md-6"}
+# @param biplotShapeBy export::dataArg::sampleInfo::{"default": "Grade", "index":2, "individual": true, "class":"col-12 col-md-6"}
 # en: Biplot Shape By
 # zh: 双标图形状列
-# @param eigencorplotMetavars export::dataArg::sampleInfo::{"default": "", "index":3, "individual": true, "class":"col-12", "multiple":true}
+# @param eigencorplotMetavars export::dataArg::sampleInfo::{"default": ["Study", "Age", "Distant.RFS", "ER", "GGI", "Grade", "Size", "Time.RFS"], "index":3, "individual": true, "class":"col-12", "multiple":true}
 # en: Eigencorplot Phenotype
 # zh: 关联热图表型列
 # @param screeplotColBar export::extra::color-picker::{"default": "#0085FF", "class": "col-12 col-md-3"}
