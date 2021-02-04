@@ -552,6 +552,7 @@ args_pairs <- map(
 # 按顺序生成给 data, data2, ...
 # !!后续文档要描述该情况，推荐按函数设定顺序写参数说明
 data_idx <- 1
+dataArg_idx <- 1 # 如果只有第 2 个数据表格有选择列功能，对应索引应当为 1
 args_pairs2 <- c()
 for (i in seq_along(args_pairs)) {
   if (args_pairs[[i]][1] == "data") {
@@ -568,12 +569,13 @@ for (i in seq_along(args_pairs)) {
         map_chr(args_pairs[idx], 2), "=",
         paste0(
           "conf$dataArg[[",
-          data_idx, "]][[",
+          dataArg_idx, "]][[",
           map_chr(args_pairs[idx], 4),
           "]]$value,"
         )
       )
       z <- c(z, z2)
+      dataArg_idx <- dataArg_idx + 1
     }
 
     data_idx <- data_idx + 1
