@@ -118,7 +118,7 @@ Then you can submit the generated `data.json` and `ui.json` to https://hiplot.co
 This section I will briefly describe supported tags, for more information, please read the Docs.
 
 - `@hiplot`, 1 line, seperates the useful comments parsed by **HiSub**, only `start` and `end` are valid.
-- `@appname`, 1line,  set your plugin name.
+- `@appname`, 1 line,  set your plugin name (cannot have space, it will be used to set the plugin URL on hiplot).
 - `@apptitle`, 3 lines, set your plugin title.
   - The 2nd line set English title.
   - The 3rd line set Chinese title.
