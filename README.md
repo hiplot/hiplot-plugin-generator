@@ -137,7 +137,7 @@ This section I will briefly describe supported tags, for more information, pleas
 - `@param`: many lines. From the 2nd line, it is same sa `@description`. For the 1st line, it has the rules:
   - `<param_name> export::<param-type>::<widget-type>::<param_setting>`
   - All `param_name`s are used to describe the parameters in the main function, here is `hello world()`.
-  - `param-type` can be hiplot-textarea (the most used), cloud-file, combobox, codemirror, etc. (See docs for more)
+  - `param-type` can be data (for data table), dataArg (for selecting column names in a data table), extra (custom parameters in your main function).
   - `widget-type` can be slider, switch, select, autocomplete, color-picker, text-field.
   - `param_setting` (JSON format) depends on the `widget-type`. In most common cases, a `default` item is supported to set default value for the parameter, others items will be passed to front end for setting widget UI and behavior.
 - `@return`: 1line, it has the rules:
