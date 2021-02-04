@@ -372,7 +372,7 @@ collect_params <- function(x) {
           }
           if (length(fpath) > 0) {
             edata <- read_lines(file.path(outdir, fpath))
-            esize <- file.info("app.R")$size / 1024 # Kb
+            esize <- file.info(file.path(outdir, fpath))$size / 1024 # Kb
             if (esize > 500) {
               edata <- edata[sample(seq_len(edata), round(250 * length(edata / esize)))]
             }
@@ -493,16 +493,16 @@ shifter <- function(x, n = -1) {
   if (n == 0) x else c(tail(x, -n), head(x, n))
 }
 
-if (length(a$params$params_data) > 0) {
+if (length(unlist(a$params$params_data)) > 0) {
   json_data$params$config$data <- a$params$params_data
   json_data$params$config <- shifter(json_data$params$config)
 }
-if (length(a$params$params_textarea) > 0) {
+if (length(unlist(a$params$params_textarea)) > 0) {
   json_data$params$textarea <- a$params$params_textarea
   json_data$params <- shifter(json_data$params)
 }
 
-if (length(a$params$example_data) > 0) {
+if (length(unlist(a$params$example_data)) > 0) {
   json_data$exampleData$data <- a$params$example_data
   json_data$exampleData <- shifter(json_data$exampleData)
 }
