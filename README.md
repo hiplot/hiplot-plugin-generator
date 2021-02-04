@@ -1,4 +1,4 @@
-# HiSub: a tool converting annotated R script to a Hiplot Vue plugin
+# HiSub: a tool generating Hiplot plugin from R script
 
 ## Introduction
 
