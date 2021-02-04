@@ -149,8 +149,8 @@ This section I will briefly describe supported tags, for more information, pleas
 
 ### More Examples
 
-- [ezcox](examples/ezcox.R)
-- [pcatools](examples/pcatools.R)
+- [ezcox](examples/ezcox.R) - <https://hiplot.com.cn/basic/ezcox>
+- [pcatools](examples/pcatools.R) - <https://hiplot.com.cn/basic/pcatools>
 
 ### Docs
 

@@ -12,7 +12,7 @@
 # All rights reserved.                                #
 #######################################################
 
-# 函数参数除了 default，其他直接转换 hiplot 前端支持的所有选项
+# https://hiplot.com.cn/basic/ezcox
 #
 # @hiplot start
 # @appname ezcox
