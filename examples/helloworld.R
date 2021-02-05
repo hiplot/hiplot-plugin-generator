@@ -32,7 +32,7 @@
 # @param add_line export::extra::switch::{"default": true, "class":"col-12"}
 # en: Add Line
 # zh: 添加线图
-# @return ggplot::["pdf", "png"]::{"title": "A test plot", "width":4, "height": 4, "theme": "theme_bw"}
+# @return ggplot::["pdf", "png"]::{"cliMode": true, "title": "A test plot", "width":4, "height": 4, "theme": "theme_bw"}
 # @data
 # # You can write the code to generate the example data
 # # 'data.txt' described in parameter data, or you can
