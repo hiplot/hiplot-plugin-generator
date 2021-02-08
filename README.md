@@ -20,12 +20,22 @@ git clone https://github.com/hiplot/hiplot-plugin-generator
 cd hiplot-plugin-generator
 ```
 
-Then you can prepare a R script descibe below.
+Then you can prepare a R script named `source.R` with:
 
-Let's get started with the Hello World plugin for Hiplot, which shows the core concept of **Hisub** and most common setting.
+```sh
+./hisub.R template
+```
+
+Next modify the `source.R` as your wish and convert it into your Hiplot plugin.
+
+```sh
+./hisub.R source.R <output-directory>
+```
 
 
 ### Hello World
+
+For preparing the core R script, let's get started with the Hello World plugin for Hiplot, which shows the core concept of **Hisub** and most common setting.
 
 The contents of `helloworld.R`:
 

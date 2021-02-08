@@ -78,16 +78,17 @@ call_ezcox <- function(data,
                        vars_to_show,
                        drop_controls,
                        add_caption) {
-
   if (ncol(data) < 3) {
     stop("Input data should have at least 3 columns!")
   }
 
   if (!all(c("time", "status") %in% colnames(data))) {
     cat("WARN: 'time' and 'status' colnames not exist in input data.",
-        sep = "\n")
+      sep = "\n"
+    )
     cat("WARN: rename the first and the second column as 'time' and 'status'.",
-        sep = "\n")
+      sep = "\n"
+    )
     colnames(data)[1:2] <- c("time", "status")
   }
 
@@ -119,5 +120,3 @@ call_ezcox <- function(data,
     add_caption = add_caption
   )
 }
-
-

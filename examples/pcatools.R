@@ -81,71 +81,82 @@ call_pcatools <- function(datTable, sampleInfo,
                           plotloadingsHighCol,
                           eigencorplotMetavars,
                           eigencorplotComponents) {
-  row.names(datTable) <- datTable[,1]
-  datTable <- datTable[,-1]
-  row.names(sampleInfo) <- sampleInfo[,1]
-  sampleInfo <- sampleInfo[,-1]
+  row.names(datTable) <- datTable[, 1]
+  datTable <- datTable[, -1]
+  row.names(sampleInfo) <- sampleInfo[, 1]
+  sampleInfo <- sampleInfo[, -1]
   data3 <- pca(datTable, metadata = sampleInfo, removeVar = (100 - top_var) / 100)
 
   p1 <- PCAtools::screeplot(
-    data3, components = getComponents(data3, 1:screeplotComponents),
+    data3,
+    components = getComponents(data3, 1:screeplotComponents),
     axisLabSize = 14, titleLabSize = 20,
     colBar = screeplotColBar,
     gridlines.major = FALSE, gridlines.minor = FALSE,
-    returnPlot = TRUE)
+    returnPlot = TRUE
+  )
 
   p2 <- PCAtools::pairsplot(
-    data3, components = getComponents(data3, c(1:pairsplotComponents)),
+    data3,
+    components = getComponents(data3, c(1:pairsplotComponents)),
     triangle = TRUE, trianglelabSize = 12,
     hline = 0, vline = 0,
     pointSize = 0.8, gridlines.major = FALSE, gridlines.minor = FALSE,
-    colby = 'Grade',
-    title = '', plotaxes = FALSE,
-    margingaps = unit(c(0.01, 0.01, 0.01, 0.01), 'cm'),
+    colby = "Grade",
+    title = "", plotaxes = FALSE,
+    margingaps = unit(c(0.01, 0.01, 0.01, 0.01), "cm"),
     returnPlot = TRUE,
-    colkey = get_hiplot_color(conf$general$palette, -1,
-                              conf$general$palette_custom)) #!!
+    colkey = get_hiplot_color(
+      conf$general$palette, -1,
+      conf$general$palette_custom
+    )
+  ) # !!
 
   params_biplot <- list(data3,
-                        showLoadings = TRUE,
-                        lengthLoadingsArrowsFactor = 1.5,
-                        sizeLoadingsNames = 4,
-                        colLoadingsNames = 'red4',
-                        # other parameters
-                        lab = NULL,
-                        hline = 0, vline = c(-25, 0, 25),
-                        vlineType = c('dotdash', 'solid', 'dashed'),
-                        gridlines.major = FALSE, gridlines.minor = FALSE,
-                        pointSize = 5,
-                        legendPosition = 'none', legendLabSize = 16, legendIconSize = 8.0,
-                        drawConnectors = FALSE,
-                        title = 'PCA bi-plot',
-                        subtitle = 'PC1 versus PC2',
-                        caption = '27 PCs ≈ 80%',
-                        returnPlot = TRUE)
-  if (!is.null(biplotShapeBy) &&  biplotShapeBy != "") {
+    showLoadings = TRUE,
+    lengthLoadingsArrowsFactor = 1.5,
+    sizeLoadingsNames = 4,
+    colLoadingsNames = "red4",
+    # other parameters
+    lab = NULL,
+    hline = 0, vline = c(-25, 0, 25),
+    vlineType = c("dotdash", "solid", "dashed"),
+    gridlines.major = FALSE, gridlines.minor = FALSE,
+    pointSize = 5,
+    legendPosition = "none", legendLabSize = 16, legendIconSize = 8.0,
+    drawConnectors = FALSE,
+    title = "PCA bi-plot",
+    subtitle = "PC1 versus PC2",
+    caption = "27 PCs ≈ 80%",
+    returnPlot = TRUE
+  )
+  if (!is.null(biplotShapeBy) && biplotShapeBy != "") {
     params_biplot$shape <- biplotShapeBy
   }
   if (!is.null(biplotColBy) && biplotColBy != "") {
     params_biplot$colby <- biplotColBy
-    params_biplot$colkey <- get_hiplot_color(conf$general$palette, -1,
-                                             conf$general$palette_custom) #!!
+    params_biplot$colkey <- get_hiplot_color(
+      conf$general$palette, -1,
+      conf$general$palette_custom
+    ) # !!
   }
 
   p3 <- do.call(PCAtools::biplot, params_biplot)
 
   p4 <- PCAtools::plotloadings(
-    data3, rangeRetain = 0.01, labSize = 4,
+    data3,
+    rangeRetain = 0.01, labSize = 4,
     components = getComponents(data3, c(1:plotloadingsComponents)),
-    title = 'Loadings plot', axisLabSize = 12,
-    subtitle = 'PC1, PC2, PC3, PC4, PC5',
-    caption = 'Top 1% variables',
+    title = "Loadings plot", axisLabSize = 12,
+    subtitle = "PC1, PC2, PC3, PC4, PC5",
+    caption = "Top 1% variables",
     gridlines.major = FALSE, gridlines.minor = FALSE,
     shape = 24, shapeSizeRange = c(4, 8),
     col = c(plotloadingsLowCol, plotloadingsMidCol, plotloadingsHighCol),
-    legendPosition = 'none',
+    legendPosition = "none",
     drawConnectors = FALSE,
-    returnPlot = TRUE)
+    returnPlot = TRUE
+  )
 
   eigencorplotMetavars <- unlist(eigencorplotMetavars)
   if (length(eigencorplotMetavars) > 0) {
@@ -159,43 +170,47 @@ call_pcatools <- function(datTable, sampleInfo,
     metavars = metavars,
     cexCorval = 1.0,
     fontCorval = 2,
-    posLab = 'all',
+    posLab = "all",
     rotLabX = 45,
     scale = TRUE,
     main = "PC clinical correlates",
     cexMain = 1.5,
     plotRsquared = FALSE,
-    corFUN = 'pearson',
-    corUSE = 'pairwise.complete.obs',
-    signifSymbols = c('****', '***', '**', '*', ''),
+    corFUN = "pearson",
+    corUSE = "pairwise.complete.obs",
+    signifSymbols = c("****", "***", "**", "*", ""),
     signifCutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1),
-    returnPlot = TRUE)
+    returnPlot = TRUE
+  )
 
   p6 <- plot_grid(
     p1, p2, p3,
     ncol = 3,
-    labels = c('A', 'B  Pairs plot', 'C'),
-    label_fontfamily = 'serif',
-    label_fontface = 'bold',
+    labels = c("A", "B  Pairs plot", "C"),
+    label_fontfamily = "serif",
+    label_fontface = "bold",
     label_size = 22,
-    align = 'h',
-    rel_widths = c(1.10, 0.80, 1.10))
+    align = "h",
+    rel_widths = c(1.10, 0.80, 1.10)
+  )
 
   p7 <- plot_grid(
     p4,
     as.grob(p5),
     ncol = 2,
-    labels = c('D', 'E'),
-    label_fontfamily = 'serif',
-    label_fontface = 'bold',
+    labels = c("D", "E"),
+    label_fontfamily = "serif",
+    label_fontface = "bold",
     label_size = 22,
-    align = 'h',
-    rel_widths = c(0.8, 1.2))
+    align = "h",
+    rel_widths = c(0.8, 1.2)
+  )
 
   p <- plot_grid(
     p6, p7,
     ncol = 1,
-    rel_heights = c(1.1, 0.9))
+    rel_heights = c(1.1, 0.9)
+  )
 
   out_xlsx <- paste(opt$outputFilePrefix, ".xlsx", sep = "")
   write.xlsx(as.data.frame(data3$rotated), out_xlsx, row.names = TRUE)
