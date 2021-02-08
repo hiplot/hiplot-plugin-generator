@@ -32,6 +32,14 @@ Next modify the `source.R` as your wish and convert it into your Hiplot plugin.
 ./hisub.R source.R <output-directory>
 ```
 
+For better use this tools, I recommend you to generate a soft link to the `hisub.R` with command similar to
+
+```sh
+ln -s ~/Documents/GitHub/hiplot-plugin-generator/hisub.R ~/.local/bin/hisub
+```
+
+Change the first path to your clone `hisub.R` path and change the second path to a path store executable file.
+NOTE, the second path should be in system `PATH` variable so you can call **HiSub** with `hisub`.
 
 ### Hello World
 

@@ -94,6 +94,15 @@ if (length(Args) == 1) {
   }
 }
 
+if (length(Args) == 0) {
+  message("No operations detected.")
+  message("Usage:")
+  message("\t[hisub template] to generate a template.")
+  message("\t[hisub source.R ... outdir] to convert R script to Hiplot plugin.")
+  message("\nDetails see <https://github.com/hiplot/hiplot-plugin-generator>")
+  quit("no", -1)
+}
+
 # 如果传入的不是 2 个参数，中间的文件原样拷贝到插件目录以支持
 # 已准备好的数据文件或其他所需脚本
 fc <- file_content <- read_lines(Args[1])
