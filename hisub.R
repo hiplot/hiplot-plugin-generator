@@ -91,14 +91,21 @@ if (length(Args) == 1) {
     write_lines(TEMPLATE, file = "source.R")
     message("Done")
     quit("no")
+  } else {
+    if (file.exists(Args[1])) {
+      Args[2] <- getwd()
+    } else {
+      message("The first argument should be 'template' or a R script file path for generating plugin.")
+      quit("no", -1)
+    }
   }
 }
 
 if (length(Args) == 0) {
   message("No operations detected.")
   message("Usage:")
-  message("\t[hisub template] to generate a template.")
-  message("\t[hisub source.R ... outdir] to convert R script to Hiplot plugin.")
+  message("\t`hisub template` to generate a template.")
+  message("\t`hisub source.R [...] [outdir]` to convert R script to Hiplot plugin.")
   message("\nDetails see <https://github.com/hiplot/hiplot-plugin-generator>")
   quit("no", -1)
 }
