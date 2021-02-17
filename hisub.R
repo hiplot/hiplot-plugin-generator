@@ -460,8 +460,12 @@ collect_params <- function(x) {
           if (length(fpath) > 0) {
             edata <- read_lines(file.path(outdir, fpath))
             esize <- file.info(file.path(outdir, fpath))$size / 1024 # Kb
+            message("\tSet example data")
+            message("\t data rows: ", length(edata))
+            message("\t esize: ", esize)
             if (esize > 500) {
-              edata <- edata[sample(seq_len(edata), round(250 * length(edata / esize)))]
+              edata <- edata[sample(seq_along(edata), round(250 * length(edata) / esize))]
+              message("\t reset esize to: ", esize)
             }
             example_textarea[[y$param_name]] <<- paste(edata, collapse = "\n")
           }
@@ -554,12 +558,7 @@ json_data <- list(
       dataArg = a$params$params_dataArg,
       general = c(
         list(
-          cmd = "",
-          imageExportType = a$return$value$outfmt[a$return$value$outfmt %in% c("pdf", "png", "tiff", "plotly", "pptx")],
-          size = list(
-            width = if (length(a$return$value$outsetting$width) == 1) a$return$value$outsetting$width else 6,
-            height = if (length(a$return$value$outsetting$height) == 1) a$return$value$outsetting$height else 4
-          )
+          cmd = ""
         ),
         a$return$value$outsetting[!names(a$return$value$outsetting) %in% c("width", "height")]
       ),
@@ -578,6 +577,14 @@ json_data <- list(
 
 shifter <- function(x, n = -1) {
   if (n == 0) x else c(tail(x, -n), head(x, n))
+}
+
+if (a$return$value$outtype != "directory") {
+  json_data$params$config$general$imageExportType <- a$return$value$outfmt[a$return$value$outfmt %in% c("pdf", "png", "tiff", "plotly", "pptx")]
+  json_data$params$config$general$size <- list(
+    width = if (length(a$return$value$outsetting$width) == 1) a$return$value$outsetting$width else 6,
+    height = if (length(a$return$value$outsetting$height) == 1) a$return$value$outsetting$height else 4
+  )
 }
 
 if (length(unlist(a$params$params_data)) > 0) {
