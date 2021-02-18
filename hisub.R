@@ -465,8 +465,8 @@ collect_params <- function(x) {
             message("\t data rows: ", elen)
             message("\t esize: ", esize)
             if (esize > 500 & elen > 1) {
-              edata <- edata[c(1, sample(2:(elen + 1), round(250 * elen / esize)))]
-              message("\t reset esize")
+              edata <- edata[c(1, sample(seq_along(edata[-1]), round(250 * elen / esize)))]
+              message("\t reset esize to: ", esize)
             }
             example_textarea[[y$param_name]] <<- paste(edata, collapse = "\n")
           }
