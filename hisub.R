@@ -460,11 +460,12 @@ collect_params <- function(x) {
           if (length(fpath) > 0) {
             edata <- read_lines(file.path(outdir, fpath))
             esize <- file.info(file.path(outdir, fpath))$size / 1024 # Kb
+            elen <- length(edata) - 1
             message("\tSet example data")
-            message("\t data rows: ", length(edata))
+            message("\t data rows: ", elen)
             message("\t esize: ", esize)
-            if (esize > 500) {
-              edata <- edata[sample(seq_along(edata), round(250 * length(edata) / esize))]
+            if (esize > 500 & elen > 1) {
+              edata <- edata[c(1, sample(seq_along(edata[-1]), round(250 * elen / esize)))]
               message("\t reset esize to: ", esize)
             }
             example_textarea[[y$param_name]] <<- paste(edata, collapse = "\n")
