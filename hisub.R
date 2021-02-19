@@ -634,7 +634,7 @@ write_json(json_ui, file.path(outdir, "ui.json"),
 # plot.R
 # 保留输入脚本
 message("  - plot.R")
-write_lines(fc, file.path(outdir, "plot.R"))
+if (outdir != ".") write_lines(fc, file.path(outdir, "plot.R"))
 # 生成 plot.R 进行调用
 args_pairs <- map(
   a[names(a) == "param"],
@@ -724,11 +724,11 @@ if (a$return$value$outtype %in% c("ggplot", "plot")) {
 } else if (a$return$value$outtype == "directory") {
   plot_r <- c(
     plot_r,
-    "\nexport_directory()"
+    "\nexport_directory(opt, conf)"
   )
 }
 
-write_lines(plot_r, file.path(outdir, "plot.R"), append = TRUE)
+write_lines(plot_r, file.path(outdir, "plot.R"), append = outdir != ".")
 
 style_file(file.path(outdir, "plot.R"))
 
