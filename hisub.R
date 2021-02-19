@@ -657,10 +657,12 @@ args_pairs2 <- c()
 for (i in seq_along(args_pairs)) {
   if (args_pairs[[i]][1] == "data") {
     if (data_idx == 1) {
-      z <- paste(args_pairs[[i]][2], "= data, ")
+      dat_label <- 'if (exists("data")) data else ""'
     } else {
-      z <- paste(args_pairs[[i]][2], "=", paste0("data", data_idx, ","))
+      dat_label <- paste0("data", data_idx)
+      dat_label <- sprintf('if (exists("%s")) %s else ""', dat_label, dat_label)
     }
+    z <- paste(args_pairs[[i]][2], "=", paste0(dat_label, ","))
 
     # 补充对应的 dataArg
     idx <- map_chr(args_pairs, 1) == "dataArg" & map_chr(args_pairs, 3) == args_pairs[[i]][2]
