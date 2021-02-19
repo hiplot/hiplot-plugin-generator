@@ -465,7 +465,7 @@ collect_params <- function(x) {
             message("\t data rows: ", elen)
             message("\t esize: ", esize)
             if (esize > 500 & elen > 1) {
-              edata <- edata[c(1, sample(2:(elen + 1), round(250 * elen / esize)))]
+              edata <- edata[c(1, sort(sample(2:(elen + 1), round(250 * elen / esize))))]
               message("\t reset esize")
             }
             example_textarea[[y$param_name]] <<- paste(edata, collapse = "\n")
@@ -580,8 +580,13 @@ shifter <- function(x, n = -1) {
   if (n == 0) x else c(tail(x, -n), head(x, n))
 }
 
+
+outfmt <- c("pdf", "png", "tiff", "plotly", "pptx")
+if (any(a$return$value$outfmt %in% outfmt)) {
+  json_data$params$config$general$imageExportType <- a$return$value$outfmt[a$return$value$outfmt %in% outfmt]
+}
+
 if (a$return$value$outtype != "directory") {
-  json_data$params$config$general$imageExportType <- a$return$value$outfmt[a$return$value$outfmt %in% c("pdf", "png", "tiff", "plotly", "pptx")]
   json_data$params$config$general$size <- list(
     width = if (length(a$return$value$outsetting$width) == 1) a$return$value$outsetting$width else 6,
     height = if (length(a$return$value$outsetting$height) == 1) a$return$value$outsetting$height else 4
