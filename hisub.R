@@ -657,10 +657,10 @@ args_pairs2 <- c()
 for (i in seq_along(args_pairs)) {
   if (args_pairs[[i]][1] == "data") {
     if (data_idx == 1) {
-      dat_label <- 'if (exists("data")) data else ""'
+      dat_label <- 'if (exists("data") && is.data.frame(data)) data else ""'
     } else {
       dat_label <- paste0("data", data_idx)
-      dat_label <- sprintf('if (exists("%s")) %s else ""', dat_label, dat_label)
+      dat_label <- sprintf('if (exists("%s") && is.data.frame(%s)) %s else ""', dat_label, dat_label, dat_label)
     }
     z <- paste(args_pairs[[i]][2], "=", paste0(dat_label, ","))
 
