@@ -1,7 +1,17 @@
-# Documentation of Hiplot Vue Plugin Converter (Hiplot Vue 插件转换工具文档)
+# Hiplot Vue 插件生成器文档
 
-## Introduction (介绍)
+## 介绍
 
-## Tag List (标签列表)
+## 标签列表
 
-### Widget List (控件类型)
+
+## 通用参数
+
+一般是为 ggplot2 设定的
+## Vue 控件类型
+
+vue 控件类型和常用参数
+
+## 全局变量
+
+conf 和 opt 这两个全局变量
