@@ -719,12 +719,12 @@ if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
 if (a$return$value$outtype %in% c("ggplot", "plot")) {
   plot_r <- c(
     plot_r,
-    "\nexport_single(p, opt, conf)"
+    "\nexport_single(p)"
   )
 } else if (a$return$value$outtype == "directory") {
   plot_r <- c(
     plot_r,
-    "\nexport_directory(opt, conf)"
+    "\nexport_directory()"
   )
 }
 
