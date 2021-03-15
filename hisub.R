@@ -717,10 +717,18 @@ if (a$return$value$outtype %in% c("plot", "basic", "grid")) {
 
 # 增加对图片的配置
 if (a$return$value$outtype %in% c("ggplot", "plot")) {
+  if (any(c("font", "theme", "palette") %in% names(a$return$value$outsetting))) {
+    plot_r <- c(
+      plot_r,
+      "\np <- set_complex_general_theme(set_palette_theme(p, conf))"
+    )
+  }
+
   plot_r <- c(
     plot_r,
     "\nexport_single(p)"
   )
+
 } else if (a$return$value$outtype == "directory") {
   plot_r <- c(
     plot_r,
