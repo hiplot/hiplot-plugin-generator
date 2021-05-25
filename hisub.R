@@ -10,10 +10,11 @@
 # 6. 基于配置和输入文件生成 plot.R
 #
 # ./hisub.R examples/helloworld.R test_hello
-VERSION <- 0.2
+VERSION <- 0.3
 
 TEMPLATE <- '# @hiplot start
 # @appname helloworld
+# @alias An-Example
 # @apptitle
 # Hiplot Hello World
 # Hiplot 示例插件
@@ -156,6 +157,9 @@ parse_tag_value <- function(x) sub("# *@[^ ]+ +([^ ]+).*", "\\1", x[1])
 parse_tag_header <- function(x) sub("# *@[^ ]+ +", "", x[1])
 parse_tag_appname <- function(x) {
   list(type = "appname", value = parse_tag_value(x))
+}
+parse_tag_alias <- function(x) {
+  list(type = "alias", value = parse_tag_header(x))
 }
 parse_tag_apptitle <- function(x) {
   list(
@@ -331,6 +335,7 @@ parse_tag <- function(x, name) {
   switch(
     name,
     appname = parse_tag_appname(x),
+    alias = parse_tag_alias(x),
     apptitle = parse_tag_apptitle(x),
     target = parse_tag_target(x),
     tag = parse_tag_tag(x),
@@ -527,6 +532,7 @@ a$params <- collect_params(a)
 # Metadata for the plugin
 json_meta <- list(
   name = list(zh_cn = a$apptitle$value$zh, en = a$apptitle$value$en),
+  alias = if (is.null(a$alias$value)) list(a$appname$value) else list(a$alias$value),
   intro = list(zh_cn = a$description$value$zh, en = a$description$value$en),
   src = "",
   href = paste0("/", a$target$value, "/", a$appname$value),

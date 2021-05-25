@@ -2,6 +2,7 @@
 #
 # @hiplot start
 # @appname helloworld
+# @alias An-Example
 # @apptitle
 # Hiplot Hello World
 # Hiplot 示例插件
