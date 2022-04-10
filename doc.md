@@ -39,13 +39,20 @@
 
 ## 通用参数
 
-一般是为 ggplot2 设定的
+一般是为 ggplot2 设定的。
 ## Vue 控件类型
 
 `<param-type>::<widget-type>::<param_setting>`
 
-vue 控件类型和常用参数
+Vue 控件类型和常用参数
 
 ## 全局变量
 
-conf 和 opt 这两个全局变量
+`conf` 和 `opt` 这两个全局变量，可以直接使用。
+
+`conf`为最常用的一个，里面包含了从`data.json`中解析出来的插件参数。
+
+## More
+
+https://hiplot.com.cn/docs/zh/development-guides/
+
